@@ -9,6 +9,7 @@ export interface AuthUser {
     formalName: string;
     spiritualName: string;
     phoneNumber: string;
+    email?: string;
   }
   
   // ── Storage Keys ────────────────────────────────
