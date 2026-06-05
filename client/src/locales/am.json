@@ -1,0 +1,182 @@
+{
+    "nav": {
+      "app_title": "መንገዱ",
+      "sign_out": "ውጣ",
+      "online": "በመስመር ላይ",
+      "offline": "ከመስመር ውጭ — ለውጦች ተቀምጠዋል",
+      "tab_today": "ዛሬ",
+      "tab_history": "ታሪክ",
+      "tab_profile": "መገለጫ"
+    },
+    "auth": {
+      "sign_in": "ግባ",
+      "create_account": "መለያ ፍጠር",
+      "email": "ኢሜይል",
+      "password": "የይለፍ ቃል",
+      "formal_name": "መደበኛ ስም",
+      "spiritual_name": "የክርስትና ስም",
+      "phone": "ስልክ ቁጥር",
+      "confirm_password": "የይለፍ ቃል አረጋግጥ",
+      "no_account": "መለያ የለዎትም?",
+      "have_account": "ቀድሞውኑ መለያ አለዎት?",
+      "signing_in": "በመግባት ላይ...",
+      "creating_account": "መለያ በመፍጠር ላይ...",
+      "change_password": "የይለፍ ቃል ቀይር",
+      "change_password_desc": "ከመቀጠልዎ በፊት ነባሪ የይለፍ ቃልዎን መቀየር አለብዎት።",
+      "current_password": "አሁን ያለው የይለፍ ቃል",
+      "new_password": "አዲስ የይለፍ ቃል",
+      "confirm_new_password": "አዲስ የይለፍ ቃል አረጋግጥ",
+      "changing_password": "የይለፍ ቃል በመቀየር ላይ...",
+      "password_mismatch": "አዲሶቹ የይለፍ ቃሎች አይዛመዱም።",
+      "password_too_short": "የይለፍ ቃል ቢያንስ 6 ፊደላት መሆን አለበት።"
+    },
+    "today": {
+      "title": "ዛሬ",
+      "progress": "የዛሬ ሂደት",
+      "all_completed": "ሁሉንም ተግባራት አጠናቅቀዋል — እግዚአብሔር ይባርክዎት!",
+      "saving": "በማስቀመጥ ላይ...",
+      "prayer": "ጸሎት",
+      "bible_reading": "የመጽሐፍ ቅዱስ ንባብ",
+      "spiritual_books": "ቅዱሳት መጻሕፍት",
+      "good_deeds": "መልካም ሥራ",
+      "avoiding_evil": "ከክፉ መለየት",
+      "quote_title": "ከአባት ቃል",
+      "select_prompt": "ምን አደረጉ?",
+      "confirm": "አረጋግጥ",
+      "skip": "ዝለል",
+      "prayer_choices": {
+        "WedaseMariam": "ውዳሴ ማርያም",
+        "Dawit": "ዳዊት",
+        "Dersan": "ድርሳን",
+        "Wengel": "ወንጌል",
+        "AbuneZebsemayat": "አቡነ ዘበሰማያት",
+        "Other": "ሌላ"
+      },
+      "bible_choices": {
+        "OldTestament": "ብሉይ ኪዳን",
+        "Wengel": "ወንጌል",
+        "Melktat": "መልዕክታት",
+        "Raiey": "ራዕይ"
+      },
+      "spiritual_choices": {
+        "Dersan": "ድርሳን",
+        "HaymanoteAbew": "ሃይማኖተ አበው",
+        "Sinksar": "ስንክሳር",
+        "Other": "ሌላ"
+      },
+      "deeds_choices": {
+        "TenCommandments": "ከአሥርቱ ቃላት",
+        "SixGospel": "ስድስቱ ቃላተ ወንጌል",
+        "Other": "ሌላ"
+      },
+      "evil_choices": {
+        "TenCommandments": "ከ10 ቃላት",
+        "Other": "ሌላ"
+      },
+      "this_week": "የዚህ ሳምንት"
+    },
+    "priest": {
+      "title": "ቀሲስ",
+      "role": "ኃላፊነት",
+      "god_father": "የንስሐ አባት",
+      "dashboard": "ዳሽቦርድ",
+      "overview_publish": "ዳሽቦርድ እና ቃል",
+      "manage_subtitle": "የንስሐ ልጆችዎን ያስተዳድሩ እና መንፈሳዊ ቃል ያስተላልፉ",
+      "publish_quote": "ቃል አስተላልፍ",
+      "publish_btn": "ቃል አስተላልፍ",
+      "publishing": "በማስተላለፍ ላይ...",
+      "quote_placeholder": "ምሳሌ፡ ጸልዩ በእንተ ሰላመ ቤተ ክርስቲያን...",
+      "quote_broadcast": "ይህ ወዲያውኑ ለሁሉም ንስሐ ልጆች ይታያል።",
+      "quote_success": "✓ ቃሉ ተላልፏል!",
+      "quote_empty_error": "ቃሉ ባዶ መሆን አይችልም።",
+      "quote_length_error": "ቃሉ ከ500 ፊደላት መብለጥ አይችልም።",
+      "god_children": "የንስሐ ልጆች",
+      "search": "በስም ፈልግ...",
+      "active": "ንቁ",
+      "inactive": "የማይንቀሳቀስ",
+      "joined": "የተቀላቀለበት",
+      "no_users": "እስካሁን ምንም ንስሐ ልጅ አልተመዘገበም",
+      "no_users_search": "ተጠቃሚ አልተገኘም",
+      "total_logs": "አጠቃላይ መዝገቦች",
+      "completion": "ማጠናቀቂያ",
+      "day_streak": "የቀናት ሰንሰለት",
+      "stat_logs_desc": "ሥራ ያለባቸው ቀናት",
+      "stat_completion_desc": "አማካይ ፍጻሜ",
+      "stat_streak_desc": "ተከታታይ ቀናት",
+      "last_7_days": "ያለፉት 7 ቀናት",
+      "summary_excellent": "የተባረከ የመንፈሳዊ እድገት ሳምንት። {name} መንገዱን በመጓዝ ጸንተዋል። መንፈስ ቅዱስ ጉዟቸውን ማጠናከሩን ይቀጥልልን።",
+      "summary_good": "{name} በተለይ በ{activity} ላይ ልባዊ ጥረት እያደረጉ ነው። ለቀጣይ ቀናት ጸጋ እና ጥንካሬ እንጸልይላቸው።",
+      "summary_low": "የጸጋ እና የታድሶ ጊዜ። {name} ጸጥ ያለ ሳምንት አሳልፈዋል። መንፈሳዊ ጉዟቸው ዳግም እንዲያንሰራራ በጸሎታችን እናስባቸው።",
+      "reviews": "ግምገማዎች",
+      "write_review": "ግምገማ ጻፍ",
+      "review_placeholder": "ለዚህ ልጅ መንፈሳዊ ግምገማዎን ይጻፉ...",
+      "submit_review": "ግምገማ አስገባ",
+      "review_expires": "ጊዜው የሚያበቃው በ",
+      "review_created": "የተጻፈው",
+      "days_remaining": "ቀናት ቀርተዋል",
+      "no_reviews": "እስካሁን ምንም ግምገማ የለም",
+      "view_table": "ሠንጠረዥ",
+      "view_graph": "ግራፍ",
+      "back_dashboard": "← ወደ ዳሽቦርድ ተመለስ",
+      "user_not_found": "ተጠቃሚ አልተገኘም።",
+      "deactivate": "አቦዝን",
+      "activate": "አንቃ",
+      "confirm_deactivate": "እርግጠኛ ነዎት ይህን ንስሐ ልጅ ማቦዘን ይፈልጋሉ?",
+      "confirm_activate": "እርግጠኛ ነዎት ይህን ንስሐ ልጅ ማንቃት ይፈልጋሉ?",
+      "sign_out": "ውጣ",
+      "online": "በመስመር ላይ",
+      "offline": "ከመስመር ውጭ",
+      "activity_details": "የተግባር ዝርዝር",
+      "profile": "መገለጫ",
+      "delete_godchild": "ንስሐ ልጅ አጥፋ",
+      "confirm_delete": "እርግጠኛ ነዎት? ይህ የንስሐ ልጅን እና ሁሉንም ውሂባቸውን በቋሚነት ያጠፋል።",
+      "deleting": "እያጠፋ ነው..."
+    },
+    "profile": {
+      "total_days": "አጠቃላይ ቀናት",
+      "this_month": "በዚህ ወር",
+      "streak": "ተከታታይ ቀናት"
+    },
+    "landing": {
+      "verse": "እኔ መንገድና እውነት ሕይወትም ነኝ፤ በእኔ በቀር ወደ አብ የሚመጣ የለም።",
+      "verse_ref": "ዮሐንስ 14፡6",
+      "enter_godchild": "እንደ ንስሐ ልጅ ግባ",
+      "enter_priest": "እንደ የንስሐ አባት ግባ"
+    },
+    "history": {
+      "priest_reviewed": "ቅሲስ አይተውታል ✓"
+    },
+    "notes": {
+      "title": "የግል ማስታወሻ",
+      "placeholder": "መንፈሳዊ ሐሳቦችዎን፣ ጸሎቶችዎን ወይም ማሰላሰያዎችዎን ይጻፉ...",
+      "save": "ማስታወሻ አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "delete": "ሰርዝ",
+      "deleting": "እየሰረዘ ነው...",
+      "empty": "እስካሁን ምንም ማስታወሻ የለም። የመጀመሪያውን መንፈሳዊ ማስታወሻዎን ይጻፉ።",
+      "character_count": "{count} ፊደላት ቀርተዋል",
+      "godchild_scripture": {
+        "title": "የወንጌል መሠረት",
+        "reference": "ማቴዎስ 25:35-36",
+        "intro": "\"ተርቤ አብልታችሁኛልና፤ ተጠምቼ አጠጥታችሁኛልና፤ እንግዳ ሆኜ ተቀብላችሁኛልና፤ ታርዤ አልብሳችሁኛልና፤ ታምሜ ጠይቃችሁኛልና፤ ታስሬ ወደ እኔ መጥታችኋልና።\"",
+        "works": [
+          "የተራበውን አብልቱ",
+          "የተጠማውን አጠጡ",
+          "እንግዳውን ተቀበሉ",
+          "ራቁቱን አልብሱ",
+          "ታማሚውን ጠይቁ",
+          "እስረኛውን ጎብኙ"
+        ]
+      },
+      "priest_scripture": {
+        "title": "የእረኛው ተልእኮ",
+        "reference": "ዮሐንስ 21:15-17",
+        "intro": "\"የዮና ልጅ ስምዖን ሆይ፥ ከእነዚህ ይልቅ ትወደኛለህን?\" አለው፤ እርሱም፥ \"አዎን፥ ጌታዬ ሆይ፥ እኔ እንደምወድህ አንተ ታውቃለህ\" አለው፤ ጌታችን ኢየሱስም፥ \"በጎቼን ጠብቅ፤ ጠቦቶቼን አሰማራ፤ ግልገሎቼን ጠብቅ\" አለው።\"",
+        "verses": [
+          "\"በጎቼን ጠብቅ\"",
+          "\"ጠቦቶቼን አሰማራ\"",
+          "\"ግልገሎቼን ጠብቅ\""
+        ]
+      }
+    }
+  }

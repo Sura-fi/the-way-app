@@ -1,0 +1,104 @@
+"use client";
+
+import { useState, FormEvent } from "react";
+import Link from "next/link";
+import { useAuth } from "@/components/providers/AuthProvider";
+
+export default function LoginPage() {
+  const { login } = useAuth();
+
+  // ── Form State ────────────────────────────────
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ── Handle Submit ─────────────────────────────
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      await login({ email, password });
+      // Redirect happens inside AuthProvider.login()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <h2 className="text-xl font-semibold text-center text-umber-deep">
+        Sign In
+      </h2>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-warm-red/10 border border-warm-red/30 text-warm-red text-sm rounded-lg px-4 py-3">
+          {error}
+        </div>
+      )}
+
+      {/* Email */}
+      <div>
+        <label
+          htmlFor="login-email"
+          className="block text-sm font-medium text-umber-soft mb-1"
+        >
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="you@example.com"
+          className="input-field"
+        />
+      </div>
+
+      {/* Password */}
+      <div>
+        <label
+          htmlFor="login-password"
+          className="block text-sm font-medium text-umber-soft mb-1"
+        >
+          Password
+        </label>
+        <input
+          id="login-password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="••••••••"
+          className="input-field"
+        />
+      </div>
+
+      {/* Submit Button */}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? "Signing in..." : "Sign In"}
+      </button>
+
+      {/* Link to Register */}
+      <p className="text-center text-sm text-umber-soft">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="text-gold-muted hover:text-gold-bright font-medium transition-colors"
+        >
+          Create one
+        </Link>
+      </p>
+    </form>
+  );
+}

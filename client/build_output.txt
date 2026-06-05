@@ -1,0 +1,32 @@
+
+> client@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for client (static)...
+ ○ (pwa) Service worker: C:\Users\Administrator\Documents\መንገዱ (The Way) Project\The Way\client\public\sw.js
+ ○ (pwa)   URL: /sw.js
+ ○ (pwa)   Scope: /
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/(priest)/users/[id]/page.tsx
+15:3  Error: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/ProgressGraph.tsx
+31:52  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+35:26  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+50:30  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/ReviewSection.tsx
+30:16  Error: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+51:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:17  Error: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules

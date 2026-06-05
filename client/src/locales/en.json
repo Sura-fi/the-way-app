@@ -1,0 +1,182 @@
+{
+    "nav": {
+      "app_title": "The Way",
+      "sign_out": "Sign Out",
+      "online": "Online",
+      "offline": "Offline — changes saved locally",
+      "tab_today": "Today",
+      "tab_history": "History",
+      "tab_profile": "Profile"
+    },
+    "auth": {
+      "sign_in": "Sign In",
+      "create_account": "Create Account",
+      "email": "Email",
+      "password": "Password",
+      "formal_name": "Formal Name",
+      "spiritual_name": "Spiritual Name",
+      "phone": "Phone Number",
+      "confirm_password": "Confirm Password",
+      "no_account": "Don't have an account?",
+      "have_account": "Already have an account?",
+      "signing_in": "Signing in...",
+      "creating_account": "Creating Account...",
+      "change_password": "Change Password",
+      "change_password_desc": "You must change your default password before continuing.",
+      "current_password": "Current Password",
+      "new_password": "New Password",
+      "confirm_new_password": "Confirm New Password",
+      "changing_password": "Changing Password...",
+      "password_mismatch": "New passwords do not match.",
+      "password_too_short": "Password must be at least 6 characters."
+    },
+    "today": {
+      "title": "Today",
+      "progress": "Today's Progress",
+      "all_completed": "All activities completed — God bless you!",
+      "saving": "Saving...",
+      "prayer": "Prayer",
+      "bible_reading": "Bible Reading",
+      "spiritual_books": "Spiritual Books",
+      "good_deeds": "Good Deeds",
+      "avoiding_evil": "Avoiding Evil",
+      "quote_title": "Word from Father",
+      "select_prompt": "What did you do?",
+      "confirm": "Confirm",
+      "skip": "Skip",
+      "prayer_choices": {
+        "WedaseMariam": "Praise of Mary",
+        "Dawit": "Psalms",
+        "Dersan": "Dersan",
+        "Wengel": "Gospel",
+        "AbuneZebsemayat": "Lord's Prayer",
+        "Other": "Other"
+      },
+      "bible_choices": {
+        "OldTestament": "Old Testament",
+        "Wengel": "Gospel",
+        "Melktat": "Apostles",
+        "Raiey": "Revelation"
+      },
+      "spiritual_choices": {
+        "Dersan": "Dersan",
+        "HaymanoteAbew": "Faith of the Fathers",
+        "Sinksar": "Synaxarion",
+        "Other": "Other"
+      },
+      "deeds_choices": {
+        "TenCommandments": "From 10 Commandments",
+        "SixGospel": "6 Gospel Commandments",
+        "Other": "Other"
+      },
+      "evil_choices": {
+        "TenCommandments": "From 10 Commandments",
+        "Other": "Other"
+      },
+      "this_week": "This Week"
+    },
+    "priest": {
+      "title": "Priest",
+      "role": "Role",
+      "god_father": "God Father",
+      "dashboard": "Dashboard",
+      "overview_publish": "Overview & Publish",
+      "manage_subtitle": "Manage your God Children and publish spiritual quotes",
+      "publish_quote": "Publish a Quote",
+      "publish_btn": "Publish Quote",
+      "publishing": "Publishing...",
+      "quote_placeholder": "e.g. Pray for the peace of the Church...",
+      "quote_broadcast": "This will appear on every God Child's screen instantly.",
+      "quote_success": "✓ Quote published and broadcast to all God Children!",
+      "quote_empty_error": "Quote cannot be empty.",
+      "quote_length_error": "Quote cannot exceed 500 characters.",
+      "god_children": "God Children",
+      "search": "Search by name...",
+      "active": "Active",
+      "inactive": "Inactive",
+      "joined": "Joined",
+      "no_users": "No God Children registered yet",
+      "no_users_search": "No users found matching",
+      "total_logs": "Total Logs",
+      "completion": "Completion",
+      "day_streak": "Day Streak",
+      "stat_logs_desc": "Days with activity",
+      "stat_completion_desc": "Average fulfillment",
+      "stat_streak_desc": "Consecutive days",
+      "last_7_days": "Last 7 Days",
+      "summary_excellent": "A blessed week of spiritual growth. {name} has been steadfast in walking The Way. May the Holy Spirit continue to strengthen their journey.",
+      "summary_good": "{name} is making a sincere effort, particularly in {activity}. Let us pray for continued grace and consistency in the coming days.",
+      "summary_low": "A time for grace and renewal. {name} has had a quiet week. Let us keep them in our prayers to reignite their spiritual devotion.",
+      "reviews": "Reviews",
+      "write_review": "Write a Review",
+      "review_placeholder": "Write your spiritual review for this child...",
+      "submit_review": "Submit Review",
+      "review_expires": "Expires in",
+      "review_created": "Created",
+      "days_remaining": "days remaining",
+      "no_reviews": "No reviews yet",
+      "view_table": "Table",
+      "view_graph": "Graph",
+      "back_dashboard": "← Back to Dashboard",
+      "user_not_found": "User not found.",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "confirm_deactivate": "Are you sure you want to deactivate this God Child?",
+      "confirm_activate": "Are you sure you want to reactivate this God Child?",
+      "sign_out": "Sign Out",
+      "online": "Online",
+      "offline": "Offline",
+      "activity_details": "Activity Details",
+      "profile": "Profile",
+      "delete_godchild": "Delete GodChild",
+      "confirm_delete": "Are you sure? This permanently deletes the GodChild and all their data.",
+      "deleting": "Deleting..."
+    },
+    "profile": {
+      "total_days": "Total Days",
+      "this_month": "This Month",
+      "streak": "Day Streak"
+    },
+    "landing": {
+      "verse": "I am the way, the truth, and the life. No one comes to the Father except through me.",
+      "verse_ref": "John 14:6",
+      "enter_godchild": "Enter as God Child",
+      "enter_priest": "Enter as Priest"
+    },
+    "history": {
+      "priest_reviewed": "Priest Reviewed ✓"
+    },
+    "notes": {
+      "title": "Personal Notes",
+      "placeholder": "Write your spiritual reflections, prayers, or thoughts...",
+      "save": "Save Note",
+      "saving": "Saving...",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "empty": "No notes yet. Write your first spiritual reflection.",
+      "character_count": "{count} characters remaining",
+      "godchild_scripture": {
+        "title": "The Gospel Foundation",
+        "reference": "Matthew 25:35-36",
+        "intro": "\"For I was hungry and you gave Me food; I was thirsty and you gave Me drink; I was a stranger and you took Me in; I was naked and you clothed Me; I was sick and you visited Me; I was in prison and you came to Me.\"",
+        "works": [
+          "Feed the hungry",
+          "Give drink to the thirsty",
+          "Welcome the stranger",
+          "Clothe the naked",
+          "Visit the sick",
+          "Visit the imprisoned"
+        ]
+      },
+      "priest_scripture": {
+        "title": "The Shepherd's Charge",
+        "reference": "John 21:15-17",
+        "intro": "Jesus said to Simon Peter, \"Simon, son of John, do you love Me with supreme devotion more than these?\" He said to Him, \"Yes, Lord, You know that I regard You with affection.\" Jesus said to him, \"Feed My lambs. Shepherd My sheep. Feed My sheep.\"",
+        "verses": [
+          "\"Feed My lambs\"",
+          "\"Shepherd My sheep\"",
+          "\"Feed My sheep\""
+        ]
+      }
+    }
+  }

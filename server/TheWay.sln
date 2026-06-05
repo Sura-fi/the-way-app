@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheWay.Api", "TheWay.Api\TheWay.Api.csproj", "{A60BC645-EE4A-4903-BC5E-3EDBBB56A951}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A60BC645-EE4A-4903-BC5E-3EDBBB56A951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A60BC645-EE4A-4903-BC5E-3EDBBB56A951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A60BC645-EE4A-4903-BC5E-3EDBBB56A951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A60BC645-EE4A-4903-BC5E-3EDBBB56A951}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
