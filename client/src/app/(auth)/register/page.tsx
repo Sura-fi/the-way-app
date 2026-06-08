@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
 
 export default function RegisterPage() {
@@ -54,9 +55,18 @@ export default function RegisterPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold text-center text-umber-deep">
-        Create Account
-      </h2>
+      <div className="relative">
+        <Link
+          href="/login"
+          className="absolute left-0 top-1/2 -translate-y-1/2 text-umber-soft hover:text-umber-deep transition-colors"
+          aria-label="Go back to login"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h2 className="text-xl font-semibold text-center text-umber-deep">
+          Create Account
+        </h2>
+      </div>
 
       {/* Error Banner */}
       {error && (

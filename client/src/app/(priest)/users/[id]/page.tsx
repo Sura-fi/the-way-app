@@ -219,20 +219,32 @@ export default function PriestUserDetailPage() {
   return (
     <div className="max-w-4xl space-y-6">
       {/* ── Header & Stats Card ─────────────────── */}
-      <div className="sacred-card flex flex-col pt-6 pb-6 px-8 relative overflow-hidden">
+      <div className="sacred-card flex flex-col pt-6 pb-6 px-4 sm:px-8 relative overflow-hidden">
         {/* Subtle background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gold-muted/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
-        {/* Header Row */}
-        <div className="flex justify-between items-start relative">
-          <div className="flex-1 min-w-0 relative">
+        {/* Top bar: back + status */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => router.push("/dashboard")}
-              className="absolute -left-10 top-1.5 p-1.5 text-umber-soft hover:text-umber-deep hover:bg-gold-muted/10 rounded-xl transition-colors"
+              className="p-1.5 text-umber-soft hover:text-umber-deep hover:bg-gold-muted/10 rounded-xl transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            
+            <span
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${user.isActive
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-rose-50 text-rose-700 border-rose-200"
+                }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${user.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
+              {user.isActive ? t("priest.active") : t("priest.inactive")}
+            </span>
+          </div>
+
+          {/* User info */}
+          <div>
             <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-2">
               <h1 className="text-3xl font-bold font-ethiopic text-umber-deep">
                 {user.formalName}
@@ -265,30 +277,19 @@ export default function PriestUserDetailPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <div className="flex items-center gap-2">
-              <span
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide border ${user.isActive
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : "bg-rose-50 text-rose-700 border-rose-200"
-                  }`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${user.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500"}`} />
-                {user.isActive ? t("priest.active") : t("priest.inactive")}
-              </span>
-              <button
-                onClick={handleToggleStatus}
-                disabled={isTogglingStatus}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.isActive
-                    ? "bg-warm-red/10 text-warm-red hover:bg-warm-red/20"
-                    : "bg-sage/10 text-sage hover:bg-sage/20"
-                  } disabled:opacity-50`}
-              >
-                <UserX className="w-3.5 h-3.5" />
-                {user.isActive ? t("priest.deactivate") : t("priest.activate")}
-              </button>
-            </div>
-            
+          {/* Admin actions */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleToggleStatus}
+              disabled={isTogglingStatus}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.isActive
+                  ? "bg-warm-red/10 text-warm-red hover:bg-warm-red/20"
+                  : "bg-sage/10 text-sage hover:bg-sage/20"
+                } disabled:opacity-50`}
+            >
+              <UserX className="w-3.5 h-3.5" />
+              {user.isActive ? t("priest.deactivate") : t("priest.activate")}
+            </button>
             <button
               onClick={handleDelete}
               disabled={isDeleting}
@@ -304,7 +305,7 @@ export default function PriestUserDetailPage() {
         <div className="h-px w-full bg-parchment-dark/30 my-6 relative" />
 
         {/* Global Stats Row */}
-        <div className="flex justify-between items-center px-4 relative">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center px-4 relative gap-6 sm:gap-0">
           
           {/* Lifetime Logs */}
           <div className="group relative flex items-center gap-4 cursor-help">
@@ -388,7 +389,7 @@ export default function PriestUserDetailPage() {
       {/* ── Weekly View Section ──────────────────── */}
       <div className="sacred-card p-0 overflow-hidden">
         {/* Week Navigator */}
-        <div className="bg-parchment-dark/10 p-4 border-b border-parchment-dark/20 flex items-center justify-between">
+        <div className="bg-parchment-dark/10 p-4 border-b border-parchment-dark/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => setSelectedWeek(prev => prev ? Math.max(1, prev - 1) : 1)}
@@ -397,7 +398,7 @@ export default function PriestUserDetailPage() {
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div className="flex flex-col items-center min-w-32">
+            <div className="flex flex-col items-center min-w-0 sm:min-w-32">
               <span className="font-bold text-umber-deep">
                 {selectedWeek === user.currentWeekNumber ? "Current Week (W" + selectedWeek + ")" : "Week " + selectedWeek}
               </span>
@@ -457,12 +458,12 @@ export default function PriestUserDetailPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-parchment-dark/5">
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 whitespace-nowrap">Day</th>
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Prayer</th>
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Bible Reading</th>
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Spiritual Books</th>
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Good Deeds</th>
-                      <th className="px-5 py-3 text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Avoiding Evil</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 whitespace-nowrap">Day</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Prayer</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Bible Reading</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Spiritual Books</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Good Deeds</th>
+                      <th className="px-2 sm:px-5 py-2 sm:py-3 text-[11px] sm:text-sm font-medium text-umber-deep border-b border-parchment-dark/20 text-center">Avoiding Evil</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-parchment-dark/10">
@@ -481,7 +482,7 @@ export default function PriestUserDetailPage() {
 
                       return (
                         <tr key={date} className={`transition-colors ${isToday ? "bg-sage/5" : "hover:bg-parchment-dark/5"}`}>
-                          <td className="px-5 py-4 whitespace-nowrap">
+                          <td className="px-2 sm:px-5 py-3 sm:py-4 whitespace-nowrap">
                             <div className="flex flex-col">
                               <span className={`font-medium ${isToday ? "text-sage font-bold" : "text-umber-deep"}`}>
                                 Day {i + 1}
@@ -501,11 +502,11 @@ export default function PriestUserDetailPage() {
                           ].map((items, idx) => {
                             const hasItems = items && items.length > 0;
                             return (
-                              <td key={idx} className="px-3 py-4 text-center max-w-40">
+                              <td key={idx} className="px-2 sm:px-3 py-3 sm:py-4 text-center max-w-[60px] sm:max-w-40">
                                 {isFuture ? (
                                   <span className="inline-block w-2 h-2 rounded-full bg-parchment-dark/20" />
                                 ) : hasItems ? (
-                                  <span className="text-xs text-umber-deep leading-snug block">
+                                  <span className="text-[10px] sm:text-xs text-umber-deep leading-snug block truncate">
                                     {formatSelections(items)}
                                   </span>
                                 ) : (
@@ -534,7 +535,7 @@ export default function PriestUserDetailPage() {
             {(weekData.isComplete || (weekData.isCurrentWeek && user.currentDayInWeek === 7)) && (
               <div className="border-t border-parchment-dark/20 bg-parchment/30 p-6 relative">
                 {!weekData.isCurrentWeek && (
-                  <div className="absolute top-6 right-6">
+                  <div className="relative sm:absolute sm:top-6 sm:right-6 mt-2 sm:mt-0">
                     <button
                       onClick={async () => {
                         if (!confirm(`Clear all logs and reviews for Week ${selectedWeek}?`)) return;
@@ -558,7 +559,7 @@ export default function PriestUserDetailPage() {
                   <h3 className="font-bold text-umber-deep">Week {selectedWeek} Summary</h3>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10">
                     <div className="text-sm text-umber-soft mb-1">Active Days</div>
                     <div className="text-2xl font-bold text-umber-deep">{weekData.summary.daysWithActivity} <span className="text-sm font-normal text-umber-soft">/ 7</span></div>

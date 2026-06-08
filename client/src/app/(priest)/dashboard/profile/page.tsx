@@ -1,13 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { UserCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, UserCircle, BookOpen } from "lucide-react";
 import NoteSection from "@/components/ui/NoteSection";
 import en from "@/locales/en.json";
 import am from "@/locales/am.json";
 
 export default function PriestProfilePage() {
+  const router = useRouter();
   const { user } = useAuth();
   const { t, locale } = useLocale();
 
@@ -46,6 +48,15 @@ export default function PriestProfilePage() {
 
   return (
     <div className="space-y-6">
+      {/* Back button */}
+      <button
+        onClick={() => router.push("/dashboard")}
+        className="inline-flex items-center gap-1.5 text-sm text-umber-soft hover:text-umber-deep transition-colors"
+        aria-label="Go back to dashboard"
+      >
+        <ArrowLeft className="w-4 h-4" />
+      </button>
+
       {/* Profile header */}
       <div className="sacred-card text-center py-8 space-y-4">
         <div className="w-20 h-20 rounded-full bg-gold-muted/15 text-gold-muted text-3xl font-bold flex items-center justify-center mx-auto">
