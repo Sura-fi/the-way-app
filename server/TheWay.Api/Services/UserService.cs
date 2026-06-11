@@ -474,9 +474,13 @@ public class UserService
             ["AvoidingEvil"] = logs.Count(l => l.AvoidingEvilSelections.Count > 0),
         };
 
-        var sorted = categoryCounts.OrderByDescending(kv => kv.Value).ToList();
-        var strongest = sorted.Where(kv => kv.Value > 0).Take(2).Select(kv => kv.Key).ToArray();
-        var weakest = sorted.Where(kv => kv.Value < 7).TakeLast(2).Select(kv => kv.Key).ToArray();
+        var maxCount = categoryCounts.Values.DefaultIfEmpty(0).Max();
+        var strongest = categoryCounts
+            .Where(kv => kv.Value == maxCount && kv.Value > 0)
+            .Select(kv => kv.Key).ToArray();
+        var weakest = categoryCounts
+            .Where(kv => kv.Value > 0 && kv.Value < maxCount)
+            .Select(kv => kv.Key).ToArray();
 
         return new WeekSummary
         {

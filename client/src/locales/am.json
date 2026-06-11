@@ -106,7 +106,7 @@
       "last_7_days": "ያለፉት 7 ቀናት",
       "summary_excellent": "የተባረከ የመንፈሳዊ እድገት ሳምንት። {name} መንገዱን በመጓዝ ጸንተዋል። መንፈስ ቅዱስ ጉዟቸውን ማጠናከሩን ይቀጥልልን።",
       "summary_good": "{name} በተለይ በ{activity} ላይ ልባዊ ጥረት እያደረጉ ነው። ለቀጣይ ቀናት ጸጋ እና ጥንካሬ እንጸልይላቸው።",
-      "summary_low": "የጸጋ እና የታድሶ ጊዜ። {name} ጸጥ ያለ ሳምንት አሳልፈዋል። መንፈሳዊ ጉዟቸው ዳግም እንዲያንሰራራ በጸሎታችን እናስባቸው።",
+      "summary_low": "መንፈስ ቅዱስ በ{activity} ላይ ጸጋ እና ጽናት ይስጣቸው። {name}ን በጸሎታችን እናስባቸው ለታደሰ ጉልበት።",
       "reviews": "ግምገማዎች",
       "write_review": "ግምገማ ጻፍ",
       "review_placeholder": "ለዚህ ልጅ መንፈሳዊ ግምገማዎን ይጻፉ...",
@@ -130,7 +130,17 @@
       "profile": "መገለጫ",
       "delete_godchild": "ንስሐ ልጅ አጥፋ",
       "confirm_delete": "እርግጠኛ ነዎት? ይህ የንስሐ ልጅን እና ሁሉንም ውሂባቸውን በቋሚነት ያጠፋል።",
-      "deleting": "እያጠፋ ነው..."
+      "deleting": "እያጠፋ ነው...",
+      "walking_strong": "በጽናት እየተጓዙ",
+      "encouragement": "የፍቅር ማበረታቻ",
+      "week_summary": "ሳምንት {week} ማጠቃለያ",
+      "active_days": "ንቁ ቀናት",
+      "completion_rate": "የማጠናቀቅ መጠን",
+      "reviewed": "ታይቷል",
+      "needs_review": "ግምገማ ያስፈልጋል",
+      "day7_summary_ready": "የሳምንት ማጠቃለያ ለግምገማ ዝግጁ ነው",
+      "day7_summary_soon": "የሳምንት ማጠቃለያ በቀን 7 ይከፈታል",
+      "needs_review_section": "ግምገማ ያስፈልጋል"
     },
     "profile": {
       "total_days": "አጠቃላይ ቀናት",
@@ -178,5 +188,8 @@
           "\"ግልገሎቼን ጠብቅ\""
         ]
       }
+    },
+    "common": {
+      "and": "እና"
     }
   }
