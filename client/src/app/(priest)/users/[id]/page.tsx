@@ -216,6 +216,18 @@ export default function PriestUserDetailPage() {
     });
   }
 
+  // Map server category keys to translated display names
+  const categoryLabel = (key: string): string => {
+    const map: Record<string, string> = {
+      Prayer: t("today.prayer"),
+      BibleReading: t("today.bible_reading"),
+      SpiritualBooks: t("today.spiritual_books"),
+      GoodDeeds: t("today.good_deeds"),
+      AvoidingEvil: t("today.avoiding_evil"),
+    };
+    return map[key] ?? key;
+  };
+
   return (
     <div className="max-w-4xl space-y-6">
       {/* ── Header & Stats Card ─────────────────── */}
@@ -554,32 +566,57 @@ export default function PriestUserDetailPage() {
                   </div>
                 )}
                 
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-4 flex-wrap">
                   <Target className="w-5 h-5 text-gold-muted" />
-                  <h3 className="font-bold text-umber-deep">Week {selectedWeek} Summary</h3>
+                  <h3 className="font-bold text-umber-deep">{t("priest.week_summary").replace("{week}", String(selectedWeek))}</h3>
+                  {weekData.hasReview ? (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sage/15 text-sage border border-sage/20">
+                      ✓ {t("priest.reviewed")}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-warm-red/10 text-warm-red border border-warm-red/20">
+                      {t("priest.needs_review")}
+                    </span>
+                  )}
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10">
-                    <div className="text-sm text-umber-soft mb-1">Active Days</div>
+                    <div className="text-sm text-umber-soft mb-1">{t("priest.active_days")}</div>
                     <div className="text-2xl font-bold text-umber-deep">{weekData.summary.daysWithActivity} <span className="text-sm font-normal text-umber-soft">/ 7</span></div>
                   </div>
                   <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10">
-                    <div className="text-sm text-umber-soft mb-1">Completion Rate</div>
+                    <div className="text-sm text-umber-soft mb-1">{t("priest.completion_rate")}</div>
                     <div className="text-2xl font-bold text-gold-muted">{weekData.summary.completionRate}%</div>
                   </div>
-                  <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10">
-                    <div className="text-sm text-umber-soft mb-1">Strongest Areas</div>
-                    <div className="text-sm font-medium text-sage">
-                      {weekData.summary.strongestAreas.length > 0 ? weekData.summary.strongestAreas.join(", ") : "—"}
+
+                  {/* Qualitative — Walking Strong */}
+                  {weekData.summary.strongestAreas.length > 0 && (
+                    <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10 sm:col-span-2">
+                      <div className="text-sm text-umber-soft mb-1">{t("priest.walking_strong")}</div>
+                      <p className="text-sm text-sage italic leading-relaxed">
+                        {weekData.summary.strongestAreas.length === 5
+                          ? t("priest.summary_excellent").replace("{name}", user.spiritualName)
+                          : t("priest.summary_good")
+                              .replace("{name}", user.spiritualName)
+                              .replace("{activity}", weekData.summary.strongestAreas
+                                .map(categoryLabel).join(` ${t("common.and")} `))}
+                      </p>
                     </div>
-                  </div>
-                  <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10">
-                    <div className="text-sm text-umber-soft mb-1">Needs Focus</div>
-                    <div className="text-sm font-medium text-warm-red/80">
-                      {weekData.summary.weakestAreas.length > 0 ? weekData.summary.weakestAreas.join(", ") : "—"}
+                  )}
+
+                  {/* Qualitative — Gentle Encouragement */}
+                  {weekData.summary.weakestAreas.length > 0 && (
+                    <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10 sm:col-span-2">
+                      <div className="text-sm text-umber-soft mb-1">{t("priest.encouragement")}</div>
+                      <p className="text-sm text-warm-red/80 italic leading-relaxed">
+                        {t("priest.summary_low")
+                            .replace("{name}", user.spiritualName)
+                            .replace("{activity}", weekData.summary.weakestAreas
+                              .map(categoryLabel).join(` ${t("common.and")} `))}
+                      </p>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}

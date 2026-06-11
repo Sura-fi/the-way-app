@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, Fragment } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
@@ -54,7 +54,13 @@ export default function DashboardPage() {
         const data = await apiFetch<UserSummary[]>(
           `/api/users?search=${encodeURIComponent(search)}&page=${page}&pageSize=${pageSize}${statusParam}`
         );
-        setUsers(data);
+        // Sort: Day 7 first (needs review), then Day 5-6, then rest (alphabetical within groups)
+        const sorted = [...data].sort((a, b) => {
+          const pa = a.currentDayInWeek === 7 ? 0 : a.currentDayInWeek >= 5 ? 1 : 2;
+          const pb = b.currentDayInWeek === 7 ? 0 : b.currentDayInWeek >= 5 ? 1 : 2;
+          return pa !== pb ? pa - pb : a.formalName.localeCompare(b.formalName);
+        });
+        setUsers(sorted);
       } catch {
         // Handle error silently
       }
@@ -232,27 +238,38 @@ export default function DashboardPage() {
         ) : (
           <div className="space-y-2">
             {users.map((user, index) => (
-              <motion.div
-                key={user.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Link
-                  href={`/users/${user.id}`}
-                  className={`sacred-card flex items-center justify-between group transition-all ${
-                    !user.isActive ? "opacity-50 border-parchment-dark/20" : ""
-                  }`}
+              <Fragment key={user.id}>
+                {index === 0 && user.currentDayInWeek === 7 && (
+                  <div className="text-xs font-bold text-warm-red uppercase tracking-wider pb-1">
+                    {t("priest.needs_review_section")}
+                  </div>
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  <div>
-                    <p className="font-medium text-umber-deep group-hover:text-gold-muted transition-colors flex items-center gap-2">
-                      {user.formalName}
-                      {user.currentDayInWeek >= 5 && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-sm font-bold ${user.currentDayInWeek === 7 ? 'bg-warm-red/20 text-warm-red animate-pulse' : 'bg-gold-muted/20 text-gold-muted'}`}>
-                          Day {user.currentDayInWeek}
-                        </span>
-                      )}
-                    </p>
+                  <Link
+                    href={`/users/${user.id}`}
+                    className={`sacred-card flex items-center justify-between group transition-all ${
+                      !user.isActive ? "opacity-50 border-parchment-dark/20" : ""
+                    }`}
+                  >
+                    <div>
+                      <p className="font-medium text-umber-deep group-hover:text-gold-muted transition-colors flex items-center gap-2">
+                        {user.formalName}
+                        {user.currentDayInWeek >= 5 && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-sm font-bold ${user.currentDayInWeek === 7 ? 'bg-warm-red/20 text-warm-red animate-pulse' : 'bg-gold-muted/20 text-gold-muted'}`}
+                            title={user.currentDayInWeek === 7
+                              ? t("priest.day7_summary_ready")
+                              : t("priest.day7_summary_soon")}
+                          >
+                            Day {user.currentDayInWeek}
+                            {user.currentDayInWeek === 7 && " · ✦"}
+                          </span>
+                        )}
+                      </p>
                     <p className="text-sm text-umber-soft font-ethiopic">
                       {user.spiritualName}
                     </p>
@@ -276,8 +293,9 @@ export default function DashboardPage() {
                       })}
                     </p>
                   </div>
-                </Link>
-              </motion.div>
+                  </Link>
+                </motion.div>
+              </Fragment>
             ))}
             
             {/* Pagination Controls */}

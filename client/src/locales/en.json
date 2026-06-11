@@ -106,7 +106,7 @@
       "last_7_days": "Last 7 Days",
       "summary_excellent": "A blessed week of spiritual growth. {name} has been steadfast in walking The Way. May the Holy Spirit continue to strengthen their journey.",
       "summary_good": "{name} is making a sincere effort, particularly in {activity}. Let us pray for continued grace and consistency in the coming days.",
-      "summary_low": "A time for grace and renewal. {name} has had a quiet week. Let us keep them in our prayers to reignite their spiritual devotion.",
+      "summary_low": "May the Holy Spirit grant grace and perseverance in {activity}. Let us keep {name} in our prayers for renewed strength.",
       "reviews": "Reviews",
       "write_review": "Write a Review",
       "review_placeholder": "Write your spiritual review for this child...",
@@ -130,7 +130,17 @@
       "profile": "Profile",
       "delete_godchild": "Delete GodChild",
       "confirm_delete": "Are you sure? This permanently deletes the GodChild and all their data.",
-      "deleting": "Deleting..."
+      "deleting": "Deleting...",
+      "walking_strong": "Walking Strong",
+      "encouragement": "Gentle Encouragement",
+      "week_summary": "Week {week} Summary",
+      "active_days": "Active Days",
+      "completion_rate": "Completion Rate",
+      "reviewed": "Reviewed",
+      "needs_review": "Needs Review",
+      "day7_summary_ready": "Week summary is ready for review",
+      "day7_summary_soon": "Week summary unlocks on Day 7",
+      "needs_review_section": "Needs Review"
     },
     "profile": {
       "total_days": "Total Days",
@@ -178,5 +188,8 @@
           "\"Feed My sheep\""
         ]
       }
+    },
+    "common": {
+      "and": "and"
     }
   }
