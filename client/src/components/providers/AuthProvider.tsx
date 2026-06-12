@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { AuthUser, saveAuth, getStoredUser, clearAuth } from "@/lib/auth";
+import { AuthUser, saveAuth, getStoredUser, clearAuth, isTokenExpired, validateTokenWithServer } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 
 // ── Types ───────────────────────────────────────
@@ -44,13 +44,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // On mount: restore user from localStorage
+  // On mount: restore user from localStorage if token is still valid
   useEffect(() => {
     const stored = getStoredUser();
     if (stored) {
-      setUser(stored);
+      if (isTokenExpired(stored.token)) {
+        clearAuth();
+        setIsLoading(false);
+        return;
+      }
+
+      // Validate the token with the server before allowing access
+      validateTokenWithServer(stored.token).then((isValid) => {
+        if (isValid) {
+          setUser(stored);
+        } else {
+          clearAuth();
+        }
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   // ── Login ───────────────────────────────────
