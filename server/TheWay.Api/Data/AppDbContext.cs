@@ -142,22 +142,5 @@ public class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ─────────────────────────────────────
-        // SEED: Priest admin account
-        // ─────────────────────────────────────
-        var priestId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
-
-        modelBuilder.Entity<User>().HasData(new User
-        {
-            Id = priestId,
-            FormalName = "Administrator",
-            SpiritualName = "ቀሲስ",
-            Email = "priest@theway.app",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("ChangeMe!2026"),
-            Role = "Priest",
-            MustChangePassword = true,
-            IsActive = true,
-            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-        });
     }
 }
