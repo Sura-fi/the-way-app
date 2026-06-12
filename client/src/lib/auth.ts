@@ -41,6 +41,16 @@ export interface AuthUser {
     return localStorage.getItem(TOKEN_KEY);
   }
   
+  // ── Token Expiry Check ───────────────────────────
+  export function isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.exp * 1000 < Date.now();
+    } catch {
+      return true;
+    }
+  }
+
   // ── Clear (Logout) ──────────────────────────────
   export function clearAuth(): void {
     localStorage.removeItem(TOKEN_KEY);

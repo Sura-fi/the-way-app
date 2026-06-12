@@ -1,3 +1,5 @@
+import { clearAuth } from "./auth";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5111";
 
 /**
@@ -33,6 +35,16 @@ export async function apiFetch<T>(
 
   // 4. If the response is not OK, throw an error with the server message
   if (!response.ok) {
+    // 401 + we thought we were logged in → stale session
+    if (response.status === 401 && typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("theway_user");
+      if (storedUser) {
+        clearAuth();
+        window.location.href = "/login";
+        throw new Error("Your session has expired. Please sign in again.");
+      }
+    }
+
     const errorBody = await response.json().catch(() => ({}));
     throw new Error(
       errorBody.message || `Request failed with status ${response.status}`
