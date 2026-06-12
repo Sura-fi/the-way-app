@@ -6,6 +6,7 @@ using TheWay.Api.Hubs;
 using Microsoft.EntityFrameworkCore;
 using TheWay.Api.Data;
 using TheWay.Api.Services;
+using TheWay.Api.Models.Domain;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -162,5 +163,31 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<QuoteHub>("/hubs/quote");
+
+// ──────────────────────────────────────────────
+// 7. Auto-migrate + seed the priest account
+// ──────────────────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
+    if (!await db.Users.AnyAsync(u => u.Email == "priest@theway.app"))
+    {
+        db.Users.Add(new User
+        {
+            Id = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+            FormalName = "Administrator",
+            SpiritualName = "ቀሲስ",
+            Email = "priest@theway.app",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("ChangeMe!2026"),
+            Role = "Priest",
+            MustChangePassword = true,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync();
+    }
+}
 
 app.Run();
