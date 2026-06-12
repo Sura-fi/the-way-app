@@ -68,6 +68,13 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpGet("validate")]
+    [Authorize]
+    public IActionResult ValidateToken()
+    {
+        return Ok();
+    }
+
     [Authorize]
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)

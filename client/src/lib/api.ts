@@ -13,9 +13,16 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  // 1. Read the token from localStorage (may be null if not logged in)
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("theway_token") : null;
+  // 1. Read the token from the stored user object (single source of truth)
+  let token: string | null = null;
+  if (typeof window !== "undefined") {
+    try {
+      const raw = localStorage.getItem("theway_user");
+      if (raw) token = JSON.parse(raw).token ?? null;
+    } catch {
+      token = null;
+    }
+  }
 
   // 2. Build headers — always send JSON, attach token if we have one
   const headers: Record<string, string> = {

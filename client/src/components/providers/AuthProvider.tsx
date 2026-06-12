@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { AuthUser, saveAuth, getStoredUser, clearAuth, isTokenExpired } from "@/lib/auth";
+import { AuthUser, saveAuth, getStoredUser, clearAuth, isTokenExpired, validateTokenWithServer } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
 
 // ── Types ───────────────────────────────────────
@@ -50,11 +50,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (stored) {
       if (isTokenExpired(stored.token)) {
         clearAuth();
-      } else {
-        setUser(stored);
+        setIsLoading(false);
+        return;
       }
+
+      // Validate the token with the server before allowing access
+      validateTokenWithServer(stored.token).then((isValid) => {
+        if (isValid) {
+          setUser(stored);
+        } else {
+          clearAuth();
+        }
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   // ── Login ───────────────────────────────────
