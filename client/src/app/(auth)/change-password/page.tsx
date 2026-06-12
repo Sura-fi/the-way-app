@@ -4,6 +4,7 @@ import { useState, FormEvent } from "react";
 import { apiFetch } from "@/lib/api";
 import { getStoredUser, saveAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ChangePasswordPage() {
   const router = useRouter();
@@ -12,6 +13,9 @@ export default function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -87,15 +91,25 @@ export default function ChangePasswordPage() {
         >
           Current Password
         </label>
-        <input
-          id="current-password"
-          type="password"
-          required
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="••••••••"
-          className="input-field"
-        />
+        <div className="relative">
+          <input
+            id="current-password"
+            type={showCurrentPassword ? "text" : "password"}
+            required
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="••••••••"
+            className="input-field pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-umber-soft hover:text-umber-deep transition-colors"
+            aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+          >
+            {showCurrentPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* New Password */}
@@ -106,16 +120,26 @@ export default function ChangePasswordPage() {
         >
           New Password
         </label>
-        <input
-          id="new-password"
-          type="password"
-          required
-          minLength={6}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="••••••••"
-          className="input-field"
-        />
+        <div className="relative">
+          <input
+            id="new-password"
+            type={showNewPassword ? "text" : "password"}
+            required
+            minLength={6}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="••••••••"
+            className="input-field pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-umber-soft hover:text-umber-deep transition-colors"
+            aria-label={showNewPassword ? "Hide password" : "Show password"}
+          >
+            {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Confirm New Password */}
@@ -126,16 +150,26 @@ export default function ChangePasswordPage() {
         >
           Confirm New Password
         </label>
-        <input
-          id="confirm-password"
-          type="password"
-          required
-          minLength={6}
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="••••••••"
-          className="input-field"
-        />
+        <div className="relative">
+          <input
+            id="confirm-password"
+            type={showConfirmPassword ? "text" : "password"}
+            required
+            minLength={6}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+            className="input-field pr-10"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-umber-soft hover:text-umber-deep transition-colors"
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+          >
+            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Submit Button */}
