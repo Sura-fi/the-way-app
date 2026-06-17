@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { db, LocalDailyLog } from "@/lib/db";
 import { apiFetch } from "@/lib/api";
 import { useOnline } from "@/components/providers/OnlineStatusProvider";
@@ -60,6 +60,14 @@ export function useChecklist() {
   const { isOnline } = useOnline();
 
   const today = getTodayString();
+
+  // Always-latest mirror of `checklist` so debounced/immediate writes never
+  // act on a stale closure (e.g. a chip click right after typing).
+  const checklistRef = useRef(checklist);
+  checklistRef.current = checklist;
+
+  // Pending debounce timer for typed free-text ("Other") saves.
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Load today's checklist on mount ───────────
   useEffect(() => {
@@ -169,20 +177,63 @@ export function useChecklist() {
     [today, isOnline]
   );
 
-  // ── Set selections for an activity ────────────
-  const setSelections = useCallback(
-    async (key: ToggleKey, selections: string[]) => {
-      const newChecklist = { ...checklist, [key]: selections };
-      setChecklist(newChecklist);
+  // ── Persist a state to Dexie + server ─────────
+  const persist = useCallback(
+    async (state: ChecklistState) => {
       setIsSaving(true);
-
-      await saveToDexie(newChecklist);
-      await syncToServer(newChecklist);
-
+      await saveToDexie(state);
+      await syncToServer(state);
       setIsSaving(false);
     },
-    [checklist, saveToDexie, syncToServer]
+    [saveToDexie, syncToServer]
   );
 
-  return { checklist, setSelections, isLoading, isSaving };
+  // ── Set selections (immediate save) ───────────
+  // Used by chips, skip, confirm, and field-blur.
+  const setSelections = useCallback(
+    (key: ToggleKey, selections: string[]) => {
+      const next = { ...checklistRef.current, [key]: selections };
+      checklistRef.current = next;
+      setChecklist(next);
+
+      // Cancel any pending typed-text save — this immediate write supersedes it.
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+      persist(next);
+    },
+    [persist]
+  );
+
+  // ── Set selections (debounced save) ───────────
+  // Used by the "Other" free-text input so typing doesn't save every keystroke.
+  const setSelectionsDebounced = useCallback(
+    (key: ToggleKey, selections: string[]) => {
+      const next = { ...checklistRef.current, [key]: selections };
+      checklistRef.current = next;
+      setChecklist(next);
+      setIsSaving(true);
+
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      debounceTimer.current = setTimeout(() => {
+        debounceTimer.current = null;
+        persist(checklistRef.current);
+      }, 400);
+    },
+    [persist]
+  );
+
+  // ── Flush a pending save on unmount (safety net) ─
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+        persist(checklistRef.current);
+      }
+    };
+  }, [persist]);
+
+  return { checklist, setSelections, setSelectionsDebounced, isLoading, isSaving };
 }

@@ -7,6 +7,7 @@ public class UserSummaryResponse
     public string SpiritualName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string? ProfilePictureUrl { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { apiFetch } from "@/lib/api";
+import { Avatar } from "@/components/ui/Avatar"; 
 import en from "@/locales/en.json";
 import {
   ArrowLeft,
@@ -29,6 +30,7 @@ interface UserDetail {
   spiritualName: string;
   email: string;
   phoneNumber: string;
+  profilePictureUrl?: string | null;
   isActive: boolean;
   totalLogs: number;
   completionRate: number;
@@ -85,7 +87,10 @@ function getChoiceLabel(key: string): string {
 
 function formatSelections(items: string[] | undefined): string {
   if (!items || items.length === 0) return "—";
-  return items.map(getChoiceLabel).join(", ");
+  return items.map((it) => {
+    if (it.startsWith("Other:")) return it.slice(6) || getChoiceLabel("Other");
+    return getChoiceLabel(it);
+  }).join(", ");
 }
 
 function parseLocalDate(dateString: string) {
@@ -255,18 +260,17 @@ export default function PriestUserDetailPage() {
             </span>
           </div>
 
-          {/* User info */}
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-2">
-              <h1 className="text-3xl font-bold font-ethiopic text-umber-deep">
-                {user.formalName}
-              </h1>
-              <p className="text-xl font-ethiopic text-umber-soft/80 italic">
-                {user.spiritualName}
-              </p>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-umber-deep/70 mb-3">
+          {/* Centered identity */}
+          <div className="flex flex-col items-center text-center">
+            <Avatar src={user.profilePictureUrl} name={user.spiritualName} sizeClasses="w-20 h-20" textClasses="text-3xl" />
+            <h1 className="text-2xl sm:text-3xl font-bold font-ethiopic text-umber-deep mt-3">
+              {user.formalName}
+            </h1>
+            <p className="text-lg font-ethiopic text-umber-soft/80 italic">
+              {user.spiritualName}
+            </p>
+
+            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-umber-deep/70 mt-3">
               <div className="flex items-center gap-1.5">
                 <Mail className="w-4 h-4 text-parchment-dark" />
                 {user.email}
@@ -278,8 +282,8 @@ export default function PriestUserDetailPage() {
                 </div>
               )}
             </div>
-            
-            <div className="flex flex-wrap items-center gap-3">
+
+            <div className="flex flex-wrap justify-center items-center gap-3 mt-3">
               <span className="text-xs font-medium text-umber-soft bg-parchment-dark/10 px-2.5 py-1 rounded-md border border-parchment-dark/10">
                 Joined {new Date(user.joinedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </span>
@@ -288,50 +292,25 @@ export default function PriestUserDetailPage() {
               </span>
             </div>
           </div>
-
-          {/* Admin actions */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleToggleStatus}
-              disabled={isTogglingStatus}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.isActive
-                  ? "bg-warm-red/10 text-warm-red hover:bg-warm-red/20"
-                  : "bg-sage/10 text-sage hover:bg-sage/20"
-                } disabled:opacity-50`}
-            >
-              <UserX className="w-3.5 h-3.5" />
-              {user.isActive ? t("priest.deactivate") : t("priest.activate")}
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-warm-red/10 text-warm-red hover:bg-warm-red/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              {isDeleting ? t("priest.deleting") : t("priest.delete_godchild")}
-            </button>
-          </div>
         </div>
 
         {/* Divider */}
         <div className="h-px w-full bg-parchment-dark/30 my-6 relative" />
 
-        {/* Global Stats Row */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center px-4 relative gap-6 sm:gap-0">
-          
+        {/* Global Stats — 3-up card grid */}
+        <div className="grid grid-cols-3 gap-3 relative">
+
           {/* Lifetime Logs */}
-          <div className="group relative flex items-center gap-4 cursor-help">
-            <div className="w-12 h-12 rounded-xl bg-gold-muted/10 flex items-center justify-center transition-all duration-300 group-hover:bg-gold-muted/20 group-hover:scale-105">
-              <ClipboardList className="w-6 h-6 text-gold-muted" />
+          <div className="group relative bg-white/50 rounded-xl border border-parchment-dark/10 p-4 flex flex-col items-center text-center cursor-help">
+            <div className="w-11 h-11 rounded-xl bg-gold-muted/10 flex items-center justify-center mb-2 transition-all duration-300 group-hover:bg-gold-muted/20 group-hover:scale-105">
+              <ClipboardList className="w-5 h-5 text-gold-muted" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-gold-muted leading-none mb-1">
-                {user.totalLogs}
-              </span>
-              <span className="text-sm font-medium text-umber-deep leading-tight border-b border-dashed border-umber-deep/30 pb-0.5">
-                Lifetime Logs
-              </span>
-            </div>
+            <span className="text-2xl font-bold text-gold-muted leading-none">
+              {user.totalLogs}
+            </span>
+            <span className="text-xs font-medium text-umber-deep mt-1">
+              Lifetime Logs
+            </span>
             {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 p-3 rounded-xl bg-charcoal/95 backdrop-blur-md text-cream-white text-xs font-medium opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl z-20 text-center leading-relaxed">
               The total number of individual spiritual activities completed across all days since joining.
@@ -340,8 +319,8 @@ export default function PriestUserDetailPage() {
           </div>
 
           {/* Current Pace */}
-          <div className="group relative flex items-center gap-4 cursor-help">
-            <div className="relative w-16 h-16 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+          <div className="group relative bg-white/50 rounded-xl border border-parchment-dark/10 p-4 flex flex-col items-center text-center cursor-help">
+            <div className="relative w-14 h-14 flex items-center justify-center mb-1 transition-transform duration-300 group-hover:scale-105">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path
                   className="text-gold-muted/20"
@@ -364,11 +343,9 @@ export default function PriestUserDetailPage() {
                 {user.completionRate}%
               </span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-umber-deep leading-tight mt-1 border-b border-dashed border-umber-deep/30 pb-0.5">
-                Current Pace
-              </span>
-            </div>
+            <span className="text-xs font-medium text-umber-deep mt-1">
+              Current Pace
+            </span>
             {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 p-3 rounded-xl bg-charcoal/95 backdrop-blur-md text-cream-white text-xs font-medium opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl z-20 text-center leading-relaxed">
               The percentage of possible activities completed so far in their current 7-day week (out of 35).
@@ -377,24 +354,49 @@ export default function PriestUserDetailPage() {
           </div>
 
           {/* Current Streak */}
-          <div className="group relative flex items-center gap-4 cursor-help">
-            <div className="w-12 h-12 rounded-xl bg-warm-red/10 flex items-center justify-center transition-all duration-300 group-hover:bg-warm-red/20 group-hover:scale-105">
-              <Flame className="w-6 h-6 text-warm-red" />
+          <div className="group relative bg-white/50 rounded-xl border border-parchment-dark/10 p-4 flex flex-col items-center text-center cursor-help">
+            <div className="w-11 h-11 rounded-xl bg-warm-red/10 flex items-center justify-center mb-2 transition-all duration-300 group-hover:bg-warm-red/20 group-hover:scale-105">
+              <Flame className="w-5 h-5 text-warm-red" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-bold text-warm-red leading-none mb-1">
-                {user.currentStreak}
-              </span>
-              <span className="text-sm font-medium text-umber-deep leading-tight border-b border-dashed border-umber-deep/30 pb-0.5">
-                Current Streak
-              </span>
-            </div>
+            <span className="text-2xl font-bold text-warm-red leading-none">
+              {user.currentStreak}
+            </span>
+            <span className="text-xs font-medium text-umber-deep mt-1">
+              Current Streak
+            </span>
             {/* Tooltip */}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 p-3 rounded-xl bg-charcoal/95 backdrop-blur-md text-cream-white text-xs font-medium opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-xl z-20 text-center leading-relaxed">
               Consecutive days with at least one logged activity. Missing an entire day resets this to 0.
               <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-charcoal/95"></div>
             </div>
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="h-px w-full bg-parchment-dark/30 my-6 relative" />
+
+        {/* Admin actions — footer, de-emphasized */}
+        <div className="flex items-center justify-center gap-2 relative">
+          <button
+            onClick={handleToggleStatus}
+            disabled={isTogglingStatus}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${user.isActive
+                ? "text-warm-red hover:bg-warm-red/10"
+                : "text-sage hover:bg-sage/10"
+              } disabled:opacity-50`}
+          >
+            <UserX className="w-3.5 h-3.5" />
+            {user.isActive ? t("priest.deactivate") : t("priest.activate")}
+          </button>
+          <span className="text-parchment-dark/40">•</span>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-warm-red hover:bg-warm-red/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            {isDeleting ? t("priest.deleting") : t("priest.delete_godchild")}
+          </button>
         </div>
       </div>
 
@@ -518,7 +520,10 @@ export default function PriestUserDetailPage() {
                                 {isFuture ? (
                                   <span className="inline-block w-2 h-2 rounded-full bg-parchment-dark/20" />
                                 ) : hasItems ? (
-                                  <span className="text-[10px] sm:text-xs text-umber-deep leading-snug block truncate">
+                                  <span
+                                    title={formatSelections(items)}
+                                    className="text-[10px] sm:text-xs text-umber-deep leading-snug block whitespace-normal break-words"
+                                  >
                                     {formatSelections(items)}
                                   </span>
                                 ) : (

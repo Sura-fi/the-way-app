@@ -60,7 +60,7 @@ function CheckMark() {
 
 export default function TodayPage() {
   const { t, locale } = useLocale();
-  const { checklist, setSelections, isLoading, isSaving } = useChecklist();
+  const { checklist, setSelections, setSelectionsDebounced, isLoading, isSaving } = useChecklist();
   const { isOnline } = useOnline();
 
   const initialStep = useMemo(() => {
@@ -73,14 +73,6 @@ export default function TodayPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const completedCount = ACTIVITIES.filter((a) => checklist[a.key].length > 0).length;
-
-  const handleToggleSelection = (key: ToggleKey, itemKey: string) => {
-    const current = checklist[key];
-    const newSelections = current.includes(itemKey)
-      ? current.filter((k) => k !== itemKey)
-      : [...current, itemKey];
-    setSelections(key, newSelections);
-  };
 
   const handleConfirm = () => {
     setRefreshKey((k) => k + 1);
@@ -132,19 +124,43 @@ export default function TodayPage() {
         <div className="space-y-2">
           {ACTIVITIES.map((activity) => {
             const selections = checklist[activity.key];
+            const done = selections.length > 0;
             return (
-              <div key={activity.key} className="bg-sage/5 rounded-xl border border-sage/20 p-3 flex items-center gap-3">
-                <div className="w-7 h-7 rounded-full bg-sage flex items-center justify-center shrink-0 shadow-[0_0_6px_rgba(90,122,94,0.35)]">
-                  <CheckMark />
+              <div
+                key={activity.key}
+                className={`rounded-xl border p-3 flex items-center gap-3 ${
+                  done
+                    ? "bg-sage/5 border-sage/20"
+                    : "bg-parchment-dark/5 border-parchment-dark/20"
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                    done
+                      ? "bg-sage shadow-[0_0_6px_rgba(90,122,94,0.35)]"
+                      : "bg-parchment-dark/20"
+                  }`}
+                >
+                  {done ? (
+                    <CheckMark />
+                  ) : (
+                    <span className="w-2.5 h-2.5 rounded-full bg-parchment-dark/40" />
+                  )}
                 </div>
-                <span className="font-medium font-ethiopic text-sage text-sm">
+                <span
+                  className={`font-medium font-ethiopic text-sm ${
+                    done ? "text-sage" : "text-umber-soft"
+                  }`}
+                >
                   {t(activity.labelKey)}
                 </span>
-                {selections.length > 0 && (
-                  <span className="text-xs text-sage/70 ml-auto">
-                    {selections.length} selected
-                  </span>
-                )}
+                <span
+                  className={`text-xs ml-auto ${
+                    done ? "text-sage/70" : "text-umber-soft/70 italic"
+                  }`}
+                >
+                  {done ? `${selections.length} selected` : t("today.not_done")}
+                </span>
               </div>
             );
           })}
@@ -200,7 +216,8 @@ export default function TodayPage() {
               icon={activity.icon}
               selections={selections}
               options={options}
-              onToggleSelection={(itemKey) => handleToggleSelection(activity.key, itemKey)}
+              onChange={(next) => setSelections(activity.key, next)}
+              onChangeText={(next) => setSelectionsDebounced(activity.key, next)}
               onConfirm={handleConfirm}
               onSkip={() => handleSkip(activity.key)}
               isActive={isActive}
@@ -209,6 +226,8 @@ export default function TodayPage() {
               totalSteps={ACTIVITIES.length}
               confirmLabel={t("today.confirm")}
               skipLabel={t("today.skip")}
+              otherPlaceholder={t("today.other_placeholder")}
+              notDoneLabel={t("today.not_done")}
             />
           );
         })}

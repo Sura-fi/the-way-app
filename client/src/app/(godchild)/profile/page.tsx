@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { Flame, BookOpen, CalendarDays, Phone, Edit3, Check, X } from "lucide-react";
 import type { LocalDailyLog } from "@/lib/db";
 import NoteSection from "@/components/ui/NoteSection";
+import { AvatarUploader } from "@/components/ui/AvatarUploader";
 import en from "@/locales/en.json";
 import am from "@/locales/am.json";
 
@@ -142,8 +143,14 @@ export default function ProfilePage() {
     <div className="space-y-6">
       {/* Profile header */}
       <div className="sacred-card text-center py-8 space-y-4">
-        <div className="w-20 h-20 rounded-full bg-gold-muted/15 text-gold-muted text-3xl font-bold flex items-center justify-center mx-auto">
-          {initial}
+        <div className="flex justify-center">
+          <AvatarUploader
+            src={user?.profilePictureUrl}
+            name={user?.spiritualName}
+            onChange={(dataUrl) => updateProfile({ profilePicture: dataUrl })}
+            sizeClasses="w-28 h-28"
+            textClasses="text-4xl"
+          />
         </div>
         <div>
           <h1 className="text-2xl font-bold font-ethiopic text-umber-deep">

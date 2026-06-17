@@ -56,7 +56,8 @@
         "OldTestament": "ብሉይ ኪዳን",
         "Wengel": "ወንጌል",
         "Melktat": "መልዕክታት",
-        "Raiey": "ራዕይ"
+        "Raiey": "ራዕይ",
+        "Other": "ሌላ"
       },
       "spiritual_choices": {
         "Dersan": "ድርሳን",
@@ -73,7 +74,9 @@
         "TenCommandments": "ከ10 ቃላት",
         "Other": "ሌላ"
       },
-      "this_week": "የዚህ ሳምንት"
+      "this_week": "የዚህ ሳምንት",
+      "other_placeholder": "ምን አደረጉ?",
+      "not_done": "ገና አልተደረገም"
     },
     "priest": {
       "title": "ቀሲስ",

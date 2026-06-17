@@ -71,7 +71,10 @@ public class AuthService
             MustChangePassword = user.MustChangePassword,
             FormalName = user.FormalName,
             SpiritualName = user.SpiritualName,
-            PhoneNumber = user.PhoneNumber
+            PhoneNumber = user.PhoneNumber,
+            Email = user.Email,
+            ProfilePictureUrl = user.ProfilePictureUrl 
+
         };
     }
 
@@ -105,7 +108,9 @@ public class AuthService
             MustChangePassword = user.MustChangePassword,
             FormalName = user.FormalName,
             SpiritualName = user.SpiritualName,
-            PhoneNumber = user.PhoneNumber
+            PhoneNumber = user.PhoneNumber,
+            Email = user.Email,
+            ProfilePictureUrl = user.ProfilePictureUrl
         };
     }
 
@@ -127,6 +132,31 @@ public class AuthService
 
             user.PhoneNumber = phone;
         }
+
+         if (request.FormalName != null)
+    {
+        var name = request.FormalName.Trim();
+        if (string.IsNullOrEmpty(name))
+            throw new InvalidOperationException("Name cannot be empty.");
+        user.FormalName = name;
+    }
+
+    if (request.ProfilePicture != null)
+    {
+        var pic = request.ProfilePicture.Trim();
+        if (pic.Length == 0)
+        {
+            user.ProfilePictureUrl = null; // clear
+        }
+        else
+        {
+            if (!pic.StartsWith("data:image/"))
+                throw new InvalidOperationException("Invalid image format.");
+            if (pic.Length > 700_000)                            // ~0.5 MB
+                throw new InvalidOperationException("Image is too large.");
+            user.ProfilePictureUrl = pic;
+        }
+    }
 
         await _db.SaveChangesAsync();
     }

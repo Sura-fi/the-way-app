@@ -87,6 +87,19 @@ public class MeController : ControllerBase
     }
 
     // ──────────────────────────────────────────
+    // GET /api/me/priest
+    // Public info of this god child's priest (name, phone, picture)
+    // ──────────────────────────────────────────
+    [HttpGet("priest")]
+    public async Task<IActionResult> GetMyPriest()
+    {
+        var priest = await _userService.GetPriestPublicAsync();
+        if (priest == null) return NotFound();
+
+        return Ok(priest);
+    }
+
+    // ──────────────────────────────────────────
     // PRIVATE: Extract user ID from JWT claims
     // ──────────────────────────────────────────
     private Guid? GetUserId()
