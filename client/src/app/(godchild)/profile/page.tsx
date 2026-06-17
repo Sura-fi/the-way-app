@@ -82,8 +82,6 @@ export default function ProfilePage() {
     loadStats();
   }, []);
 
-  const initial = user?.spiritualName?.charAt(0)?.toUpperCase() || "?";
-
   const handleEditPhone = () => {
     setPhoneDraft(user?.phoneNumber || "");
     setPhoneError("");
