@@ -54,8 +54,6 @@ export default function PriestProfilePage() {
     setSaving(false);
   };
 
-  const initial = user?.spiritualName?.charAt(0)?.toUpperCase() || "?";
-
   const scriptureCard = (
     <div className="sacred-card bg-gradient-to-br from-gold-muted/5 to-parchment">
       <div className="flex items-start gap-3">

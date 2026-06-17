@@ -36,8 +36,6 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, []);
 
-  const initial = user?.spiritualName?.charAt(0)?.toUpperCase() || "?";
-
   return (
     <ProtectedRoute allowedRoles={["GodChild"]}>
       <div className="min-h-screen bg-parchment-light">

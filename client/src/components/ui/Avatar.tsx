@@ -1,8 +1,5 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Camera } from "lucide-react";
-import { fileToAvatarDataUrl } from "@/lib/image";
 
 export function Avatar({
   src,
