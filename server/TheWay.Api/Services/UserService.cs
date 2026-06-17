@@ -58,6 +58,7 @@ public class UserService
                 SpiritualName = u.SpiritualName,
                 Email = u.Email,
                 PhoneNumber = u.PhoneNumber,
+                ProfilePictureUrl = u.ProfilePictureUrl,
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
                 CurrentDayInWeek = dayInWeek,
@@ -109,6 +110,7 @@ public class UserService
             SpiritualName = user.SpiritualName,
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
+            ProfilePictureUrl = user.ProfilePictureUrl,
             IsActive = user.IsActive,
             TotalLogs = totalLogs,
             CompletionRate = completionRate,
@@ -118,6 +120,27 @@ public class UserService
             CurrentDayInWeek = dayInWeek,
             CurrentWeekStart = weekStart,
             CurrentWeekEnd = weekEnd
+        };
+    }
+
+    // ──────────────────────────────────────────
+    // GET PRIEST — Public info of the (single) priest
+    // ──────────────────────────────────────────
+    public async Task<PriestPublicResponse?> GetPriestPublicAsync()
+    {
+        var priest = await _db.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Role == "Priest");
+
+        if (priest == null)
+            return null;
+
+        return new PriestPublicResponse
+        {
+            FormalName = priest.FormalName,
+            SpiritualName = priest.SpiritualName,
+            PhoneNumber = priest.PhoneNumber,
+            ProfilePictureUrl = priest.ProfilePictureUrl
         };
     }
 

@@ -11,6 +11,8 @@ import {
 import { useRouter } from "next/navigation";
 import { AuthUser, saveAuth, getStoredUser, clearAuth, isTokenExpired, validateTokenWithServer } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
+import { db } from "@/lib/db";
+import { syncPendingLogs } from "@/lib/sync";
 
 // ── Types ───────────────────────────────────────
 interface LoginData {
@@ -32,7 +34,8 @@ interface AuthContextType {
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
-  updateProfile: (data: { phoneNumber: string }) => Promise<void>;
+  updateProfile: (data: { phoneNumber?: string; formalName?: string; profilePicture?: string }) => Promise<void>;
+  // updateProfile: (data: { phoneNumber: string }) => Promise<void>;
 }
 
 // ── Create Context ──────────────────────────────
@@ -76,6 +79,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(data),
       });
 
+      // Drop any offline cache left by a previous identity on this device
+      // so the new user never inherits another account's local logs.
+      await db.dailyLogs.clear();
+
       saveAuth(response);
       setUser(response);
 
@@ -99,6 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(data),
       });
 
+      // Fresh identity — never inherit a prior account's local logs.
+      await db.dailyLogs.clear();
+
       saveAuth(response);
       setUser(response);
       router.push("/today");
@@ -107,7 +117,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   // ── Logout ──────────────────────────────────
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // Best-effort flush of this user's unsynced offline work before we wipe
+    // the local cache, so logging out doesn't lose pending entries.
+    if (typeof navigator !== "undefined" && navigator.onLine) {
+      try {
+        await syncPendingLogs();
+      } catch {
+        // Offline or server unreachable — proceed with logout anyway.
+      }
+    }
+
+    // Clear the per-device offline cache so the next account on this device
+    // can't read or sync this user's logs.
+    await db.dailyLogs.clear();
+    await db.cachedQuote.clear();
+
     clearAuth();
     setUser(null);
     router.push("/login");
@@ -115,14 +140,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Update Profile ─────────────────────────
   const updateProfile = useCallback(
-    async (data: { phoneNumber: string }) => {
+    async (data: { phoneNumber?: string; formalName?: string; profilePicture?: string }) => {
       await apiFetch("/api/auth/profile", {
         method: "PUT",
         body: JSON.stringify(data),
       });
 
+      // if (!user) return;
+      // const updated: AuthUser = { ...user, phoneNumber: data.phoneNumber };
       if (!user) return;
-      const updated: AuthUser = { ...user, phoneNumber: data.phoneNumber };
+    const updated: AuthUser = {
+      ...user,
+      ...(data.phoneNumber !== undefined ? { phoneNumber: data.phoneNumber } : {}),
+      ...(data.formalName !== undefined ? { formalName: data.formalName } : {}),
+      ...(data.profilePicture !== undefined
+        ? { profilePictureUrl: data.profilePicture === "" ? null : data.profilePicture }
+        : {}),
+    };
       saveAuth(updated);
       setUser(updated);
     },

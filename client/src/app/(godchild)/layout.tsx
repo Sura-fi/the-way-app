@@ -1,15 +1,25 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useOnline } from "@/components/providers/OnlineStatusProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import ProtectedRoute from "@/components/providers/ProtectedRoute";
+import { apiFetch } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, History, User } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
+import { APP_VERSION } from "@/lib/version";
+
+interface PriestInfo {
+  formalName: string;
+  spiritualName: string;
+  phoneNumber: string;
+  profilePictureUrl?: string | null;
+}
 
 export default function GodChildLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +27,14 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
   const { isOnline } = useOnline();
   const { t, locale, switchLocale } = useLocale();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [priest, setPriest] = useState<PriestInfo | null>(null);
+
+  // Fetch the god child's priest once (for the drawer contact block).
+  useEffect(() => {
+    apiFetch<PriestInfo>("/api/me/priest")
+      .then(setPriest)
+      .catch(() => {});
+  }, []);
 
   const initial = user?.spiritualName?.charAt(0)?.toUpperCase() || "?";
 
@@ -58,7 +76,7 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
               className="w-8 h-8 rounded-full bg-gold-muted/15 text-gold-muted font-bold text-sm flex items-center justify-center hover:bg-gold-muted/25 transition-colors"
               title={user?.spiritualName || "User"}
             >
-              {initial}
+             <Avatar src={user?.profilePictureUrl} name={user?.spiritualName} sizeClasses="w-8 h-8" textClasses="text-sm" />
             </button>
           </div>
         </nav>
@@ -97,9 +115,8 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
 
                 {/* User info */}
                 <div className="flex flex-col items-center px-6 pb-6 border-b border-parchment-dark/30">
-                  <div className="w-16 h-16 rounded-full bg-gold-muted/15 text-gold-muted text-2xl font-bold flex items-center justify-center mb-3">
-                    ✝
-                  </div>
+                  <Avatar src={user?.profilePictureUrl} name={user?.spiritualName} 
+                  sizeClasses="w-16 h-16" textClasses="text-2xl" />
                   <h2 className="text-xl font-bold font-ethiopic text-gold-muted text-center leading-snug">
                     {user?.spiritualName}
                   </h2>
@@ -136,6 +153,28 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
 
+                {/* Priest contact */}
+                {priest && (
+                  <div className="px-6 py-4 border-t border-parchment-dark/30">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={priest.profilePictureUrl}
+                        name={priest.spiritualName}
+                        sizeClasses="w-10 h-10"
+                        textClasses="text-base"
+                      />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-umber-deep">
+                          {t("priest.god_father")}
+                        </p>
+                        {priest.phoneNumber && (
+                          <p className="text-xs text-umber-soft">{priest.phoneNumber}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Sign out */}
                 <div className="p-6 border-t border-parchment-dark/30">
                   <button
@@ -144,6 +183,9 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                   >
                     {t("nav.sign_out")}
                   </button>
+                  <p className="mt-3 text-center text-[10px] text-umber-soft/60 tracking-wider">
+                    v{APP_VERSION}
+                  </p>
                 </div>
               </motion.div>
             </>

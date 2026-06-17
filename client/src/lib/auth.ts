@@ -10,6 +10,7 @@ export interface AuthUser {
     spiritualName: string;
     phoneNumber: string;
     email?: string;
+    profilePictureUrl?: string | null; 
   }
   
   // ── Storage Keys ────────────────────────────────

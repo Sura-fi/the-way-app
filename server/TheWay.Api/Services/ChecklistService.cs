@@ -48,11 +48,11 @@ public class ChecklistService
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 LogDate = today,
-                PrayerSelections = request.Prayer,
-                BibleReadingSelections = request.BibleReading,
-                SpiritualBooksSelections = request.SpiritualBooks,
-                GoodDeedsSelections = request.GoodDeeds,
-                AvoidingEvilSelections = request.AvoidingEvil,
+                PrayerSelections = Sanitize(request.Prayer),
+                BibleReadingSelections = Sanitize(request.BibleReading),
+                SpiritualBooksSelections = Sanitize(request.SpiritualBooks),
+                GoodDeedsSelections = Sanitize(request.GoodDeeds),
+                AvoidingEvilSelections = Sanitize(request.AvoidingEvil),
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -60,11 +60,11 @@ public class ChecklistService
         }
         else
         {
-            log.PrayerSelections = request.Prayer;
-            log.BibleReadingSelections = request.BibleReading;
-            log.SpiritualBooksSelections = request.SpiritualBooks;
-            log.GoodDeedsSelections = request.GoodDeeds;
-            log.AvoidingEvilSelections = request.AvoidingEvil;
+            log.PrayerSelections = Sanitize(request.Prayer);
+            log.BibleReadingSelections = Sanitize(request.BibleReading);
+            log.SpiritualBooksSelections = Sanitize(request.SpiritualBooks);
+            log.GoodDeedsSelections = Sanitize(request.GoodDeeds);
+            log.AvoidingEvilSelections = Sanitize(request.AvoidingEvil);
             log.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -89,11 +89,11 @@ public class ChecklistService
                     Id = Guid.NewGuid(),
                     UserId = userId,
                     LogDate = entry.LogDate,
-                    PrayerSelections = entry.Prayer,
-                    BibleReadingSelections = entry.BibleReading,
-                    SpiritualBooksSelections = entry.SpiritualBooks,
-                    GoodDeedsSelections = entry.GoodDeeds,
-                    AvoidingEvilSelections = entry.AvoidingEvil,
+                    PrayerSelections = Sanitize(entry.Prayer),
+                    BibleReadingSelections = Sanitize(entry.BibleReading),
+                    SpiritualBooksSelections = Sanitize(entry.SpiritualBooks),
+                    GoodDeedsSelections = Sanitize(entry.GoodDeeds),
+                    AvoidingEvilSelections = Sanitize(entry.AvoidingEvil),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -101,11 +101,11 @@ public class ChecklistService
             }
             else
             {
-                log.PrayerSelections = entry.Prayer;
-                log.BibleReadingSelections = entry.BibleReading;
-                log.SpiritualBooksSelections = entry.SpiritualBooks;
-                log.GoodDeedsSelections = entry.GoodDeeds;
-                log.AvoidingEvilSelections = entry.AvoidingEvil;
+                log.PrayerSelections = Sanitize(entry.Prayer);
+                log.BibleReadingSelections = Sanitize(entry.BibleReading);
+                log.SpiritualBooksSelections = Sanitize(entry.SpiritualBooks);
+                log.GoodDeedsSelections = Sanitize(entry.GoodDeeds);
+                log.AvoidingEvilSelections = Sanitize(entry.AvoidingEvil);
                 log.UpdatedAt = DateTime.UtcNow;
             }
             responses.Add(MapToResponse(log));
@@ -114,6 +114,22 @@ public class ChecklistService
         return responses;
     }
     
+    // ──────────────────────────────────────────
+    // PRIVATE: Cleans incoming selection lists before saving
+    // ──────────────────────────────────────────
+    private static List<string> Sanitize(List<string> items) =>
+        (items ?? new List<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Where(s => !IsEmptyOther(s))
+            .Select(s => s.Length > 90 ? s[..90] : s)
+            .Take(10)
+            .ToList();
+
+    // An "Other:" entry with no text after the prefix is not a real selection.
+    // A bare "Other" key is left untouched — it was a valid preset choice.
+    private static bool IsEmptyOther(string s) =>
+        s.StartsWith("Other:") && string.IsNullOrWhiteSpace(s[6..]);
+
     // ──────────────────────────────────────────
     // PRIVATE: Maps a DailyLog entity to a ChecklistResponse DTO
     // ──────────────────────────────────────────

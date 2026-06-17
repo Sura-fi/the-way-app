@@ -56,7 +56,8 @@
         "OldTestament": "Old Testament",
         "Wengel": "Gospel",
         "Melktat": "Apostles",
-        "Raiey": "Revelation"
+        "Raiey": "Revelation",
+        "Other": "Other"
       },
       "spiritual_choices": {
         "Dersan": "Dersan",
@@ -73,7 +74,9 @@
         "TenCommandments": "From 10 Commandments",
         "Other": "Other"
       },
-      "this_week": "This Week"
+      "this_week": "This Week",
+      "other_placeholder": "What did you do?",
+      "not_done": "Not done yet"
     },
     "priest": {
       "title": "Priest",

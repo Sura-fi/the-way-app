@@ -7,6 +7,7 @@ public class UserDetailResponse
     public string SpiritualName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string? ProfilePictureUrl { get; set; }
     public bool IsActive { get; set; }
     public int TotalLogs { get; set; }
     public double CompletionRate { get; set; }

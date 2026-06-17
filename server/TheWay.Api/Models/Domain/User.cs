@@ -9,6 +9,7 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string Role {get; set;} = "GodChild";
+    public string? ProfilePictureUrl { get; set; }   //  base64 data URL or null
     public bool MustChangePassword { get; set; } = false;
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

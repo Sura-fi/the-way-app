@@ -83,6 +83,27 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
     }
   });
 
+  // Compute Strongest / Needs Focus locally so never-done activities
+  // correctly surface as "Needs Focus" (god-child view only).
+  const CATEGORY_LABELS: { key: keyof DailyLog; labelKey: string }[] = [
+    { key: "prayer", labelKey: "today.prayer" },
+    { key: "bibleReading", labelKey: "today.bible_reading" },
+    { key: "spiritualBooks", labelKey: "today.spiritual_books" },
+    { key: "goodDeeds", labelKey: "today.good_deeds" },
+    { key: "avoidingEvil", labelKey: "today.avoiding_evil" },
+  ];
+
+  const counts = CATEGORY_LABELS.map((c) => ({
+    label: t(c.labelKey),
+    count: validLogs.filter((l) => {
+      const v = l[c.key];
+      return Array.isArray(v) && v.length > 0;
+    }).length,
+  }));
+  const maxCount = Math.max(0, ...counts.map((c) => c.count));
+  const strongest = counts.filter((c) => c.count === maxCount && c.count > 0).map((c) => c.label);
+  const needsFocus = counts.filter((c) => c.count < maxCount).map((c) => c.label);
+
   return (
     <div className="border-t border-parchment-dark/10 p-4 space-y-5 bg-parchment/20">
       <div className="w-full h-64 mb-6">
@@ -95,9 +116,15 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
             <Target className="w-4 h-4 text-gold-muted" />
             <h4 className="font-bold text-sm text-umber-deep">Summary</h4>
           </div>
-          <div className="flex justify-between text-xs text-umber-soft">
-            <span>Strongest: {data.summary.strongestAreas.join(", ") || "—"}</span>
-            <span>Needs Focus: {data.summary.weakestAreas.join(", ") || "—"}</span>
+          <div className="space-y-2 text-xs">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-umber-soft font-medium">Strongest</span>
+              <span className="text-sage">{strongest.join(", ") || "—"}</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-umber-soft font-medium">Needs Focus</span>
+              <span className="text-warm-red/80">{needsFocus.join(", ") || "—"}</span>
+            </div>
           </div>
         </div>
       )}
