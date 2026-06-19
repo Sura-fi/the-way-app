@@ -1,16 +1,29 @@
 "use client";
 
 import { useState, useEffect, useMemo, memo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, CloudOff } from "lucide-react";
 import { db } from "@/lib/db";
-import type { LocalDailyLog } from "@/lib/db";
+import { apiFetch } from "@/lib/api";
+import { useOnline } from "@/components/providers/OnlineStatusProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface ActivityCalendarProps {
   refreshKey: number;
 }
 
+// Minimal shape the calendar needs — satisfied by BOTH the server response
+// (ChecklistResponse) and a local Dexie LocalDailyLog, so neither path errors.
+interface CalendarLog {
+  logDate: string;
+  prayer: string[];
+  bibleReading: string[];
+  spiritualBooks: string[];
+  goodDeeds: string[];
+  avoidingEvil: string[];
+}
+
 const ACTIVITY_FIELDS: (keyof Pick<
-  LocalDailyLog,
+  CalendarLog,
   "prayer" | "bibleReading" | "spiritualBooks" | "goodDeeds" | "avoidingEvil"
 >)[] = [
   "prayer",
@@ -22,7 +35,7 @@ const ACTIVITY_FIELDS: (keyof Pick<
 
 const DAY_NAMES = ["S", "M", "T", "W", "T", "F", "S"];
 
-function countCompleted(log: LocalDailyLog): number {
+function countCompleted(log: CalendarLog): number {
   return ACTIVITY_FIELDS.filter(
     (field) => Array.isArray(log[field]) && log[field].length > 0
   ).length;
@@ -53,13 +66,16 @@ function getMonthDays(year: number, month: number): (number | null)[][] {
 }
 
 function ActivityCalendar({ refreshKey }: ActivityCalendarProps) {
+  const { isOnline } = useOnline();
+  const { t } = useLocale();
+
   const today = useMemo(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }, []);
 
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [logs, setLogs] = useState<LocalDailyLog[]>([]);
+  const [logs, setLogs] = useState<CalendarLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   const year = currentDate.getFullYear();
@@ -72,24 +88,35 @@ function ActivityCalendar({ refreshKey }: ActivityCalendarProps) {
     let cancelled = false;
     setLoading(true);
 
-    db.dailyLogs
-      .where("logDate")
-      .between(monthStart, monthEnd, true, true)
-      .toArray()
-      .then((result) => {
-        if (!cancelled) {
-          setLogs(result);
-          setLoading(false);
-        }
-      });
+    async function loadMonth() {
+      try {
+        // Server is the source of truth — survives the offline-cache clear.
+        const result = await apiFetch<CalendarLog[]>(
+          `/api/me/logs?from=${monthStart}&to=${monthEnd}`
+        );
+        if (!cancelled) setLogs(result);
+      } catch {
+        // Offline / server unreachable — fall back to local Dexie.
+        const local = await db.dailyLogs
+          .where("logDate")
+          .between(monthStart, monthEnd, true, true)
+          .toArray();
+        if (!cancelled) setLogs(local);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadMonth();
 
     return () => {
       cancelled = true;
     };
-  }, [monthStart, monthEnd, refreshKey]);
+    // isOnline added so reconnecting re-fetches the current month from the server.
+  }, [monthStart, monthEnd, refreshKey, isOnline]);
 
   const logsByDate = useMemo(() => {
-    const map = new Map<string, LocalDailyLog>();
+    const map = new Map<string, CalendarLog>();
     for (const log of logs) {
       map.set(log.logDate, log);
     }
@@ -238,6 +265,14 @@ function ActivityCalendar({ refreshKey }: ActivityCalendarProps) {
           None
         </span>
       </div>
+
+      {/* Offline notice — calendar falls back to local data when offline */}
+      {!isOnline && (
+        <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-umber-soft/70">
+          <CloudOff className="w-3 h-3" />
+          <span>{t("today.offline_data")}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -33,10 +33,18 @@ interface AuthContextType {
   isLoading: boolean;
   login: (data: LoginData) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
-  logout: () => void;
+  logout: (confirmDiscard?: () => Promise<boolean>) => Promise<void>;
   updateProfile: (data: { phoneNumber?: string; formalName?: string; profilePicture?: string }) => Promise<void>;
   // updateProfile: (data: { phoneNumber: string }) => Promise<void>;
 }
+
+// Native-confirm fallback (bilingual) used only when no styled prompt is supplied.
+// AuthProvider can't depend on LocaleProvider, so this is a plain literal.
+const LOGOUT_DISCARD_FALLBACK =
+  "You have activity that hasn't been saved to the server yet. Connect to the " +
+  "internet before logging out, or it will be lost.\n\n" +
+  "ገና ወደ አገልጋዩ ያልተቀመጠ እንቅስቃሴ አለዎት። ከመውጣትዎ በፊት ኢንተርኔት ያገናኙ፣ አለበለዚያ ይጠፋል።\n\n" +
+  "Log out anyway?";
 
 // ── Create Context ──────────────────────────────
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -117,26 +125,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   // ── Logout ──────────────────────────────────
-  const logout = useCallback(async () => {
-    // Best-effort flush of this user's unsynced offline work before we wipe
-    // the local cache, so logging out doesn't lose pending entries.
-    if (typeof navigator !== "undefined" && navigator.onLine) {
-      try {
-        await syncPendingLogs();
-      } catch {
-        // Offline or server unreachable — proceed with logout anyway.
+  const logout = useCallback(
+    async (confirmDiscard?: () => Promise<boolean>) => {
+      // 1. Best-effort flush of this user's unsynced offline work (only possible
+      //    online). On success, syncPendingLogs marks rows "synced".
+      if (typeof navigator !== "undefined" && navigator.onLine) {
+        try {
+          await syncPendingLogs();
+        } catch {
+          // Offline or server unreachable — fall through to the guard below.
+        }
       }
-    }
 
-    // Clear the per-device offline cache so the next account on this device
-    // can't read or sync this user's logs.
-    await db.dailyLogs.clear();
-    await db.cachedQuote.clear();
+      // 2. Guard: if unsynced logs still remain (offline, or sync failed), confirm
+      //    BEFORE wiping. Abort if the user declines — nothing is cleared.
+      const pending = await db.dailyLogs
+        .where("syncStatus")
+        .equals("pending")
+        .count();
+      if (pending > 0) {
+        const proceed = confirmDiscard
+          ? await confirmDiscard()
+          : typeof window !== "undefined"
+          ? window.confirm(LOGOUT_DISCARD_FALLBACK)
+          : true;
+        if (!proceed) return; // stay logged in, cache intact
+      }
 
-    clearAuth();
-    setUser(null);
-    router.push("/login");
-  }, [router]);
+      // 3. Safe to clear the per-device offline cache so the next account on this
+      //    device can't read or sync this user's logs.
+      await db.dailyLogs.clear();
+      await db.cachedQuote.clear();
+
+      clearAuth();
+      setUser(null);
+      router.push("/login");
+    },
+    [router]
+  );
 
   // ── Update Profile ─────────────────────────
   const updateProfile = useCallback(

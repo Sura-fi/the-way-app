@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { useOnline } from "@/components/providers/OnlineStatusProvider";
 import { db } from "@/lib/db";
-import { Flame, BookOpen, CalendarDays, Phone, Edit3, Check, X } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import { Flame, BookOpen, CalendarDays, Phone, Edit3, Check, X, CloudOff } from "lucide-react";
 import type { LocalDailyLog } from "@/lib/db";
 import NoteSection from "@/components/ui/NoteSection";
 import { AvatarUploader } from "@/components/ui/AvatarUploader";
@@ -15,6 +17,25 @@ interface ProfileStats {
   totalDays: number;
   thisMonth: number;
   streak: number;
+}
+
+// Server stats response (source of truth).
+interface MyStatsResponse {
+  totalDays: number;
+  thisMonthDays: number;
+  currentStreak: number;
+}
+
+// A day counts only if at least one of the 5 activities was logged
+// (matches the server definition so online/offline numbers agree).
+function dayHasActivity(log: LocalDailyLog): boolean {
+  return [
+    log.prayer,
+    log.bibleReading,
+    log.spiritualBooks,
+    log.goodDeeds,
+    log.avoidingEvil,
+  ].some((arr) => Array.isArray(arr) && arr.length > 0);
 }
 
 function calcStreak(logs: LocalDailyLog[]): number {
@@ -49,6 +70,7 @@ const PHONE_REGEX = /^(\+251|0)[79]\d{8}$/;
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
   const { t, locale } = useLocale();
+  const { isOnline } = useOnline();
   const [stats, setStats] = useState<ProfileStats>({
     totalDays: 0,
     thisMonth: 0,
@@ -66,21 +88,40 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadStats() {
-      const allLogs = await db.dailyLogs.toArray();
+      setLoading(true);
 
       const now = new Date();
-      const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+      const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
-      const totalDays = allLogs.length;
-      const thisMonth = allLogs.filter((l) => l.logDate >= monthStart).length;
-      const streak = calcStreak(allLogs);
+      try {
+        // Server is the source of truth — survives the offline-cache clear.
+        const s = await apiFetch<MyStatsResponse>(`/api/me/stats?date=${today}`);
+        setStats({
+          totalDays: s.totalDays,
+          thisMonth: s.thisMonthDays,
+          streak: s.currentStreak,
+        });
+      } catch {
+        // Offline / server unreachable — fall back to local Dexie, using the
+        // SAME "day has activity" definition so the numbers don't jump.
+        const allLogs = await db.dailyLogs.toArray();
+        const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+        const activeLogs = allLogs.filter(dayHasActivity);
 
-      setStats({ totalDays, thisMonth, streak });
-      setLoading(false);
+        setStats({
+          totalDays: activeLogs.length,
+          thisMonth: activeLogs.filter((l) => l.logDate >= monthStart).length,
+          streak: calcStreak(allLogs),
+        });
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadStats();
-  }, []);
+    // Re-fetch when connectivity returns so local-fallback numbers get
+    // replaced by the accurate server numbers.
+  }, [isOnline]);
 
   const handleEditPhone = () => {
     setPhoneDraft(user?.phoneNumber || "");
@@ -191,6 +232,14 @@ export default function ProfilePage() {
               {t("profile.streak") || "Day Streak"}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Offline notice — stats fall back to local data when offline */}
+      {!loading && !isOnline && (
+        <div className="flex items-center justify-center gap-1.5 text-[11px] text-umber-soft/70">
+          <CloudOff className="w-3.5 h-3.5" />
+          <span>{t("today.offline_data")}</span>
         </div>
       )}
 
