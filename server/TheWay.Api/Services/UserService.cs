@@ -145,6 +145,33 @@ public class UserService
     }
 
     // ──────────────────────────────────────────
+    // MY STATS — God child's own profile-card stats
+    // Days-with-activity, this-month days, current streak.
+    // ──────────────────────────────────────────
+    public async Task<MyStatsResponse> GetMyStatsAsync(Guid userId, DateOnly? clientToday)
+    {
+        var logs = await _db.DailyLogs
+            .Where(d => d.UserId == userId)
+            .AsNoTracking()
+            .ToListAsync();
+
+        // Only days with at least one activity count (consistent with streak).
+        var activeLogs = logs.Where(l => CountToggles(l) > 0).ToList();
+
+        // Anchor "today"/"this month" to the client's local date when supplied,
+        // since logs are keyed by the client's local date.
+        var anchor = clientToday ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+        return new MyStatsResponse
+        {
+            TotalDays = activeLogs.Count,
+            ThisMonthDays = activeLogs.Count(l =>
+                l.LogDate.Year == anchor.Year && l.LogDate.Month == anchor.Month),
+            CurrentStreak = CalculateStreak(activeLogs, anchor)
+        };
+    }
+
+    // ──────────────────────────────────────────
     // GET LOGS — User's daily logs with date filter
     // ──────────────────────────────────────────
     public async Task<List<ChecklistResponse>> GetUserLogsAsync(
@@ -517,9 +544,12 @@ public class UserService
 
     /// <summary>
     /// Calculates current streak of consecutive days with at least one toggle.
+    /// <paramref name="today"/> anchors "today" — pass the client's local date so the
+    /// streak matches how logs are keyed (local date); defaults to UTC today when null.
     /// </summary>
     private static int CalculateStreak(
-        List<Models.Domain.DailyLog> logs)
+        List<Models.Domain.DailyLog> logs,
+        DateOnly? today = null)
     {
         if (logs.Count == 0) return 0;
 
@@ -530,7 +560,7 @@ public class UserService
             .ToList();
 
         var streak = 0;
-        var expectedDate = DateOnly.FromDateTime(DateTime.UtcNow);
+        var expectedDate = today ?? DateOnly.FromDateTime(DateTime.UtcNow);
 
         // If they haven't logged today, start checking from yesterday
         if (sortedDates[0] != expectedDate)

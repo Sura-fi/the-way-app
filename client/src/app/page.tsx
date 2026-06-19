@@ -192,7 +192,7 @@ export default function HomePage() {
               </motion.button>
             </Link>
 
-            <Link href="/login" className="w-full sm:w-auto">
+            <Link href="/login?role=priest" className="w-full sm:w-auto">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

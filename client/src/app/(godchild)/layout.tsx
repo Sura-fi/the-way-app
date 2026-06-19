@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useOnline } from "@/components/providers/OnlineStatusProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
@@ -28,6 +28,23 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
   const { t, locale, switchLocale } = useLocale();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [priest, setPriest] = useState<PriestInfo | null>(null);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
+  // Resolves the styled logout-confirm modal: true = discard & log out, false = stay.
+  const logoutResolver = useRef<((proceed: boolean) => void) | null>(null);
+
+  // Bridge handed to logout(): opens the modal and resolves with the user's choice.
+  const confirmDiscard = () =>
+    new Promise<boolean>((resolve) => {
+      logoutResolver.current = resolve;
+      setConfirmLogout(true);
+    });
+
+  const resolveLogout = (proceed: boolean) => {
+    logoutResolver.current?.(proceed);
+    logoutResolver.current = null;
+    setConfirmLogout(false);
+  };
 
   // Fetch the god child's priest once (for the drawer contact block).
   useEffect(() => {
@@ -176,7 +193,7 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                 {/* Sign out */}
                 <div className="p-6 border-t border-parchment-dark/30">
                   <button
-                    onClick={logout}
+                    onClick={() => logout(confirmDiscard)}
                     className="w-full py-3 rounded-xl border border-warm-red/30 text-warm-red font-medium text-sm hover:bg-warm-red/5 transition-colors"
                   >
                     {t("nav.sign_out")}
@@ -184,6 +201,51 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                   <p className="mt-3 text-center text-[10px] text-umber-soft/60 tracking-wider">
                     v{APP_VERSION}
                   </p>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Logout confirm modal — only shown when unsynced offline data would be lost */}
+        <AnimatePresence>
+          {confirmLogout && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[60] bg-charcoal/40"
+                onClick={() => resolveLogout(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ type: "spring", damping: 24, stiffness: 280 }}
+                className="fixed left-1/2 top-1/2 z-[61] w-[88%] max-w-sm -translate-x-1/2 -translate-y-1/2
+                           rounded-2xl bg-cream-white border border-parchment-dark shadow-xl p-6"
+              >
+                <h3 className="text-lg font-bold font-ethiopic text-umber-deep text-center">
+                  {t("nav.logout_confirm_title")}
+                </h3>
+                <p className="mt-2 text-sm text-umber-soft text-center leading-relaxed">
+                  {t("nav.logout_confirm_body")}
+                </p>
+                <div className="mt-6 space-y-2.5">
+                  <button
+                    onClick={() => resolveLogout(false)}
+                    className="w-full py-3 rounded-xl bg-sage/15 text-sage font-medium text-sm hover:bg-sage/25 transition-colors"
+                  >
+                    {t("nav.logout_stay")}
+                  </button>
+                  <button
+                    onClick={() => resolveLogout(true)}
+                    className="w-full py-3 rounded-xl border border-warm-red/40 text-warm-red font-medium text-sm hover:bg-warm-red/10 transition-colors"
+                  >
+                    {t("nav.logout_discard")}
+                  </button>
                 </div>
               </motion.div>
             </>

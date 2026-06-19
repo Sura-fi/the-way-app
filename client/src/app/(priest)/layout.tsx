@@ -97,7 +97,7 @@ export default function PriestLayout({ children }: { children: ReactNode }) {
 
       {/* Sign Out Button */}
       <button
-        onClick={logout}
+        onClick={() => logout()}
         className="w-full flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-medium
                    text-parchment-dark hover:text-warm-red hover:bg-warm-red/10 transition-all group"
       >
@@ -247,7 +247,7 @@ export default function PriestLayout({ children }: { children: ReactNode }) {
 
                 <div className="p-6 border-t border-parchment-dark/30">
                   <button
-                    onClick={logout}
+                    onClick={() => logout()}
                     className="w-full py-3 rounded-xl border border-warm-red/30 text-warm-red font-medium text-sm hover:bg-warm-red/5 transition-colors"
                   >
                     {t("priest.sign_out")}

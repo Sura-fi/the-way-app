@@ -100,6 +100,37 @@ public class MeController : ControllerBase
     }
 
     // ──────────────────────────────────────────
+    // GET /api/me/stats?date=YYYY-MM-DD
+    // GodChild's own profile-card stats (server is source of truth).
+    // `date` = client's local today (optional) to anchor streak/this-month.
+    // ──────────────────────────────────────────
+    [HttpGet("stats")]
+    public async Task<IActionResult> GetMyStats([FromQuery] DateOnly? date)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var stats = await _userService.GetMyStatsAsync(userId.Value, date);
+        return Ok(stats);
+    }
+
+    // ──────────────────────────────────────────
+    // GET /api/me/logs?from=YYYY-MM-DD&to=YYYY-MM-DD
+    // GodChild's own daily logs in a date range (for the progress calendar).
+    // ──────────────────────────────────────────
+    [HttpGet("logs")]
+    public async Task<IActionResult> GetMyLogs(
+        [FromQuery] DateOnly? from,
+        [FromQuery] DateOnly? to)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var logs = await _userService.GetUserLogsAsync(userId.Value, from, to);
+        return Ok(logs);
+    }
+
+    // ──────────────────────────────────────────
     // PRIVATE: Extract user ID from JWT claims
     // ──────────────────────────────────────────
     private Guid? GetUserId()

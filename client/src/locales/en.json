@@ -6,7 +6,11 @@
       "offline": "Offline — changes saved locally",
       "tab_today": "Today",
       "tab_history": "History",
-      "tab_profile": "Profile"
+      "tab_profile": "Profile",
+      "logout_confirm_title": "Unsaved activity",
+      "logout_confirm_body": "You have activity that hasn't been saved to the server yet. Connect to the internet before logging out, or it will be lost.",
+      "logout_stay": "Stay & sync later",
+      "logout_discard": "Log out & discard"
     },
     "auth": {
       "sign_in": "Sign In",
@@ -76,7 +80,8 @@
       },
       "this_week": "This Week",
       "other_placeholder": "What did you do?",
-      "not_done": "Not done yet"
+      "not_done": "Not done yet",
+      "offline_data": "Showing offline data"
     },
     "priest": {
       "title": "Priest",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/components/providers/AuthProvider";
@@ -14,6 +14,14 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Hide the "Create one" (self-register) link when arriving via the Priest
+  // door (/login?role=priest) — registration is for new god children only.
+  const [isPriest, setIsPriest] = useState(false);
+  useEffect(() => {
+    const role = new URLSearchParams(window.location.search).get("role");
+    setIsPriest(role === "priest");
+  }, []);
 
   // ── Handle Submit ─────────────────────────────
   const handleSubmit = async (e: FormEvent) => {
@@ -110,16 +118,18 @@ export default function LoginPage() {
         {isSubmitting ? "Signing in..." : "Sign In"}
       </button>
 
-      {/* Link to Register */}
-      <p className="text-center text-sm text-umber-soft">
-        Don&apos;t have an account?{" "}
-        <Link
-          href="/register"
-          className="text-gold-muted hover:text-gold-bright font-medium transition-colors"
-        >
-          Create one
-        </Link>
-      </p>
+      {/* Link to Register — god children only (hidden on the Priest entry) */}
+      {!isPriest && (
+        <p className="text-center text-sm text-umber-soft">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/register"
+            className="text-gold-muted hover:text-gold-bright font-medium transition-colors"
+          >
+            Create one
+          </Link>
+        </p>
+      )}
     </form>
   );
 }

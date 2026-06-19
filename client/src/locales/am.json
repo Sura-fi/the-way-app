@@ -6,7 +6,11 @@
       "offline": "ከመስመር ውጭ — ለውጦች ተቀምጠዋል",
       "tab_today": "ዛሬ",
       "tab_history": "ታሪክ",
-      "tab_profile": "መገለጫ"
+      "tab_profile": "መገለጫ",
+      "logout_confirm_title": "ያልተቀመጠ እንቅስቃሴ",
+      "logout_confirm_body": "ገና ወደ አገልጋዩ ያልተቀመጠ እንቅስቃሴ አለዎት። ከመውጣትዎ በፊት ኢንተርኔት ያገናኙ፣ አለበለዚያ ይጠፋል።",
+      "logout_stay": "ቆይ እና ኋላ አስተካክል",
+      "logout_discard": "ውጣ እና ጣል"
     },
     "auth": {
       "sign_in": "ግባ",
@@ -76,7 +80,8 @@
       },
       "this_week": "የዚህ ሳምንት",
       "other_placeholder": "ምን አደረጉ?",
-      "not_done": "ገና አልተደረገም"
+      "not_done": "ገና አልተደረገም",
+      "offline_data": "ከመስመር ውጭ ውሂብ በማሳየት ላይ"
     },
     "priest": {
       "title": "ቀሲስ",
