@@ -210,22 +210,21 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
         {/* Logout confirm modal — only shown when unsynced offline data would be lost */}
         <AnimatePresence>
           {confirmLogout && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 z-[60] bg-charcoal/40"
-                onClick={() => resolveLogout(false)}
-              />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-charcoal/40"
+              onClick={() => resolveLogout(false)}
+            >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: "spring", damping: 24, stiffness: 280 }}
-                className="fixed left-1/2 top-1/2 z-[61] w-[88%] max-w-sm -translate-x-1/2 -translate-y-1/2
-                           rounded-2xl bg-cream-white border border-parchment-dark shadow-xl p-6"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm rounded-2xl bg-cream-white border border-parchment-dark shadow-xl p-6"
               >
                 <h3 className="text-lg font-bold font-ethiopic text-umber-deep text-center">
                   {t("nav.logout_confirm_title")}
@@ -248,7 +247,7 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                   </button>
                 </div>
               </motion.div>
-            </>
+            </motion.div>
           )}
         </AnimatePresence>
 
