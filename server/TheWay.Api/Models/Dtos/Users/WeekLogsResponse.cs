@@ -1,4 +1,5 @@
 using TheWay.Api.Models.Dtos.Checklist;
+using TheWay.Api.Models.Dtos.Reviews;
 
 namespace TheWay.Api.Models.Dtos.Users;
 
@@ -15,4 +16,5 @@ public class WeekLogsResponse
     public List<ChecklistResponse?> Logs { get; set; } = new(); // 7 slots (null = no log)
     public WeekSummary Summary { get; set; } = new();
     public bool HasReview { get; set; }            // whether a priest review exists for this week
+    public List<ReviewResponse> Reviews { get; set; } = new(); // non-expired priest reviews written this week
 }

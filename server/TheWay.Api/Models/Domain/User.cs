@@ -13,6 +13,7 @@ public class User
     public bool MustChangePassword { get; set; } = false;
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? LastSeenAt { get; set; }        // last real-time connect/disconnect (null = never)
 
 
      // Navigation properties — EF Core uses these to understand relationships

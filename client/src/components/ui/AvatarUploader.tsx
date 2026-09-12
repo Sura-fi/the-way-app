@@ -46,7 +46,7 @@ export function AvatarUploader({
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative">
-        <Avatar src={src} name={name} sizeClasses={sizeClasses} textClasses={textClasses} />
+        <Avatar src={src} name={name} sizeClasses={sizeClasses} textClasses={textClasses} zoomable />
         <button
           type="button"
           onClick={() => inputRef.current?.click()}

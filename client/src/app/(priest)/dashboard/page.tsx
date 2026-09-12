@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { useHubEvent } from "@/components/providers/QuoteProvider";
+import { PresenceIndicator, PresenceChange } from "@/components/ui/PresenceIndicator";
 import { Feather, Users } from "lucide-react";
 
 // ── Types ───────────────────────────────────────
@@ -17,6 +19,8 @@ interface UserSummary {
   createdAt: string;
   currentDayInWeek: number;
   currentWeekNumber: number;
+  isOnline: boolean;
+  lastSeenAt: string | null;
 }
 
 interface QuoteResponse {
@@ -76,6 +80,15 @@ export default function DashboardPage() {
   useEffect(() => {
     setPage(1);
   }, [search, statusFilter]);
+
+  // Live online / last-seen updates
+  useHubEvent<PresenceChange>("PresenceChanged", (p) => {
+    setUsers((us) =>
+      us.map((u) =>
+        u.id === p.userId ? { ...u, isOnline: p.isOnline, lastSeenAt: p.lastSeenAt } : u
+      )
+    );
+  });
 
   // ── Publish Quote ─────────────────────────────
   const handlePublish = async (e: FormEvent) => {
@@ -273,6 +286,11 @@ export default function DashboardPage() {
                     <p className="text-sm text-umber-soft font-ethiopic">
                       {user.spiritualName}
                     </p>
+                    <PresenceIndicator
+                      isOnline={user.isOnline}
+                      lastSeenAt={user.lastSeenAt}
+                      className="mt-1"
+                    />
                   </div>
                   <div className="text-right">
                     <span

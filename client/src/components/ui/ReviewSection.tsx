@@ -3,16 +3,16 @@
 import { useState, useEffect, FormEvent } from "react";
 import { motion } from "framer-motion";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { useHubEvent } from "@/components/providers/QuoteProvider";
 import { apiFetch } from "@/lib/api";
-import { Trash2, MessageSquare, Calendar, Clock } from "lucide-react";
-
-interface ReviewResponse {
-  id: string;
-  content: string;
-  createdAt: string;
-  expiresAt: string;
-  priestName: string;
-}
+import {
+  ReviewResponse,
+  ReviewAcknowledged,
+  getDaysRemaining,
+  getExpiryStyle,
+  formatReviewDate,
+} from "@/lib/reviews";
+import { Trash2, MessageSquare, Calendar, Clock, CheckCircle2 } from "lucide-react";
 
 export default function ReviewSection({ userId }: { userId: string }) {
   const { t } = useLocale();
@@ -34,6 +34,14 @@ export default function ReviewSection({ userId }: { userId: string }) {
     }
     fetchReviews();
   }, [userId]);
+
+  // Live "Amen" from the God Child
+  useHubEvent<ReviewAcknowledged>("ReviewAcknowledged", (ack) => {
+    if (ack.godChildId !== userId) return;
+    setReviews((rs) =>
+      rs.map((r) => (r.id === ack.reviewId ? { ...r, acknowledgedAt: ack.acknowledgedAt } : r))
+    );
+  });
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -62,40 +70,6 @@ export default function ReviewSection({ userId }: { userId: string }) {
     } catch (e) {
       alert(e instanceof Error ? e.message : "Failed to delete");
     }
-  };
-
-  const getDaysRemaining = (expiresAt: string) => {
-    const diff = new Date(expiresAt).getTime() - new Date().getTime();
-    return Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)));
-  };
-
-  // Color based on expiry urgency
-  const getExpiryStyle = (daysLeft: number) => {
-    if (daysLeft > 60) {
-      return {
-        badge: "bg-sage/10 text-sage",
-        border: "border-l-sage",
-      };
-    } else if (daysLeft > 30) {
-      return {
-        badge: "bg-gold-muted/10 text-gold-muted",
-        border: "border-l-gold-muted",
-      };
-    } else {
-      return {
-        badge: "bg-warm-red/10 text-warm-red",
-        border: "border-l-warm-red",
-      };
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "UTC",
-    });
   };
 
   if (isLoading) {
@@ -194,12 +168,24 @@ export default function ReviewSection({ userId }: { userId: string }) {
                   {review.content}
                 </p>
 
-                {/* Footer: created date */}
-                <div className="flex items-center gap-1.5 text-xs text-umber-soft">
-                  <Calendar className="w-3 h-3" />
-                  <span>
-                    {t("priest.review_created") || "Created"}: {formatDate(review.createdAt)}
-                  </span>
+                {/* Footer: created date + God Child's response */}
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-umber-soft">
+                    <Calendar className="w-3 h-3" />
+                    <span>
+                      {t("priest.review_created") || "Created"}: {formatReviewDate(review.createdAt)}
+                    </span>
+                  </div>
+                  {review.acknowledgedAt ? (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-sage/10 text-sage font-medium">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {t("priest.review_amen")} · {formatReviewDate(review.acknowledgedAt)}
+                    </span>
+                  ) : (
+                    <span className="text-umber-soft/60 italic">
+                      {t("priest.review_no_response")}
+                    </span>
+                  )}
                 </div>
               </motion.div>
             );

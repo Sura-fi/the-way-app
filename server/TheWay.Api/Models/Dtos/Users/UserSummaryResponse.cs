@@ -14,4 +14,8 @@ public class UserSummaryResponse
     // ── Week Cycle Fields (for dashboard badge) ─
     public int CurrentDayInWeek { get; set; }     // 1–7
     public int CurrentWeekNumber { get; set; }    // W1, W2, …
+
+    // ── Presence ────────────────────────────────
+    public bool IsOnline { get; set; }            // has the app open right now
+    public DateTime? LastSeenAt { get; set; }
 }

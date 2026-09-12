@@ -49,6 +49,7 @@
       "confirm": "አረጋግጥ",
       "skip": "ዝለል",
       "prayer_choices": {
+        "Kidase": "ቅዳሴ",
         "WedaseMariam": "ውዳሴ ማርያም",
         "Dawit": "ዳዊት",
         "Dersan": "ድርሳን",
@@ -123,6 +124,8 @@
       "review_created": "የተጻፈው",
       "days_remaining": "ቀናት ቀርተዋል",
       "no_reviews": "እስካሁን ምንም ግምገማ የለም",
+      "review_amen": "በአሜን ተቀብለዋል",
+      "review_no_response": "እስካሁን ምላሽ የለም",
       "view_table": "ሠንጠረዥ",
       "view_graph": "ግራፍ",
       "back_dashboard": "← ወደ ዳሽቦርድ ተመለስ",
@@ -162,7 +165,24 @@
       "enter_priest": "እንደ የንስሐ አባት ግባ"
     },
     "history": {
-      "priest_reviewed": "ቅሲስ አይተውታል ✓"
+      "priest_reviewed": "ቅሲስ አይተውታል ✓",
+      "father_comments": "የአባት አስተያየቶች",
+      "amen": "አሜን",
+      "amen_failed": "መላክ አልተቻለም። ግንኙነትዎን ያረጋግጡ።"
+    },
+    "notify": {
+      "comment_one": "ከ{name} አስተያየት ደርሶዎታል",
+      "comment_many": "ከ{name} {count} አስተያየቶች ደርሰዎታል",
+      "tap_to_open": "ሳምንት {week} · ለመክፈት ይንኩ"
+    },
+    "presence": {
+      "online_now": "አሁን በመስመር ላይ",
+      "just_now": "አሁን ታይተዋል",
+      "minutes_ago": "ከ{n} ደቂቃ በፊት ታይተዋል",
+      "today_at": "ዛሬ {time} ላይ ታይተዋል",
+      "yesterday_at": "ትናንት {time} ላይ ታይተዋል",
+      "on_at": "{day} {time} ላይ ታይተዋል",
+      "never": "ገና አልታዩም"
     },
     "notes": {
       "title": "የግል ማስታወሻ",

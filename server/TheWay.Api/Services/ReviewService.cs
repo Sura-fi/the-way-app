@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using TheWay.Api.Data;
+using TheWay.Api.Hubs;
 using TheWay.Api.Models.Domain;
 using TheWay.Api.Models.Dtos.Reviews;
 
@@ -8,28 +10,25 @@ namespace TheWay.Api.Services;
 public class ReviewService
 {
     private readonly AppDbContext _db;
+    private readonly IHubContext<QuoteHub> _hubContext;
 
-    public ReviewService(AppDbContext db)
+    public ReviewService(AppDbContext db, IHubContext<QuoteHub> hubContext)
     {
         _db = db;
+        _hubContext = hubContext;
     }
 
     // ──────────────────────────────────────────
     // LIST — Get all non-expired reviews for a God Child
     // ──────────────────────────────────────────
-    public async Task<List<ReviewResponse>> GetReviewsForChildAsync(Guid godChildId)
-    {
-        var now = DateTime.UtcNow;
+    public Task<List<ReviewResponse>> GetReviewsForChildAsync(Guid godChildId) =>
+        QueryForChildAsync(godChildId, pendingOnly: false);
 
-        var reviews = await _db.PriestReviews
-            .Where(r => r.GodChildId == godChildId && r.ExpiresAt > now)
-            .Include(r => r.Priest)
-            .OrderByDescending(r => r.CreatedAt)
-            .AsNoTracking()
-            .ToListAsync();
-
-        return reviews.Select(MapToResponse).ToList();
-    }
+    // ──────────────────────────────────────────
+    // PENDING — Non-expired reviews the God Child hasn't said "Amen" to yet
+    // ──────────────────────────────────────────
+    public Task<List<ReviewResponse>> GetPendingForChildAsync(Guid godChildId) =>
+        QueryForChildAsync(godChildId, pendingOnly: true);
 
     // ──────────────────────────────────────────
     // CREATE — Priest writes a review for a God Child
@@ -37,11 +36,13 @@ public class ReviewService
     public async Task<ReviewResponse> CreateReviewAsync(
         Guid priestId, Guid godChildId, CreateReviewRequest request)
     {
-        // Verify the God Child exists
-        var childExists = await _db.Users
-            .AnyAsync(u => u.Id == godChildId && u.Role == "GodChild");
+        // Verify the God Child exists (and get their join date for the week number)
+        var joinedAt = await _db.Users
+            .Where(u => u.Id == godChildId && u.Role == "GodChild")
+            .Select(u => (DateTime?)u.CreatedAt)
+            .FirstOrDefaultAsync();
 
-        if (!childExists)
+        if (joinedAt == null)
             throw new InvalidOperationException("God Child not found.");
 
         var review = new PriestReview
@@ -63,14 +64,47 @@ public class ReviewService
             .Select(u => u.SpiritualName)
             .FirstOrDefaultAsync() ?? "Unknown";
 
-        return new ReviewResponse
+        var response = MapToResponse(review, joinedAt.Value, priestName);
+
+        // Pop-up for the God Child if they have the app open
+        await _hubContext.Clients.User(godChildId.ToString())
+            .SendAsync("ReviewReceived", response);
+
+        return response;
+    }
+
+    // ──────────────────────────────────────────
+    // ACKNOWLEDGE — God Child says "Amen" to a review (one-way, idempotent)
+    // ──────────────────────────────────────────
+    public async Task<ReviewResponse?> AcknowledgeReviewAsync(Guid reviewId, Guid godChildId)
+    {
+        var now = DateTime.UtcNow;
+
+        var review = await _db.PriestReviews
+            .Include(r => r.Priest)
+            .FirstOrDefaultAsync(r =>
+                r.Id == reviewId && r.GodChildId == godChildId && r.ExpiresAt > now);
+
+        if (review == null)
+            return null;
+
+        if (review.AcknowledgedAt == null)
         {
-            Id = review.Id,
-            Content = review.Content,
-            CreatedAt = review.CreatedAt,
-            ExpiresAt = review.ExpiresAt,
-            PriestName = priestName
-        };
+            review.AcknowledgedAt = now;
+            await _db.SaveChangesAsync();
+
+            // Live update on the priest's screen
+            await _hubContext.Clients.Group(QuoteHub.PriestsGroup).SendAsync(
+                "ReviewAcknowledged",
+                new { reviewId = review.Id, godChildId, acknowledgedAt = review.AcknowledgedAt });
+        }
+
+        var joinedAt = await _db.Users
+            .Where(u => u.Id == godChildId)
+            .Select(u => u.CreatedAt)
+            .FirstAsync();
+
+        return MapToResponse(review, joinedAt);
     }
 
     // ──────────────────────────────────────────
@@ -90,9 +124,11 @@ public class ReviewService
     }
 
     // ──────────────────────────────────────────
-    // PRIVATE: Map domain entity to response DTO
+    // Map domain entity to response DTO.
+    // childJoinedAt anchors the week number (a review belongs to the week it was written).
     // ──────────────────────────────────────────
-    private static ReviewResponse MapToResponse(PriestReview review)
+    public static ReviewResponse MapToResponse(
+        PriestReview review, DateTime childJoinedAt, string? priestName = null)
     {
         return new ReviewResponse
         {
@@ -100,7 +136,40 @@ public class ReviewService
             Content = review.Content,
             CreatedAt = review.CreatedAt,
             ExpiresAt = review.ExpiresAt,
-            PriestName = review.Priest?.SpiritualName ?? "Unknown"
+            AcknowledgedAt = review.AcknowledgedAt,
+            WeekNumber = UserService.CalculateWeekCycle(
+                childJoinedAt, DateOnly.FromDateTime(review.CreatedAt)).WeekNumber,
+            PriestName = priestName ?? review.Priest?.SpiritualName ?? "Unknown"
         };
+    }
+
+    // ──────────────────────────────────────────
+    // PRIVATE: Non-expired reviews for a child, newest first
+    // ──────────────────────────────────────────
+    private async Task<List<ReviewResponse>> QueryForChildAsync(Guid godChildId, bool pendingOnly)
+    {
+        var now = DateTime.UtcNow;
+
+        var joinedAt = await _db.Users
+            .Where(u => u.Id == godChildId)
+            .Select(u => (DateTime?)u.CreatedAt)
+            .FirstOrDefaultAsync();
+
+        if (joinedAt == null)
+            return new();
+
+        var query = _db.PriestReviews
+            .Where(r => r.GodChildId == godChildId && r.ExpiresAt > now);
+
+        if (pendingOnly)
+            query = query.Where(r => r.AcknowledgedAt == null);
+
+        var reviews = await query
+            .Include(r => r.Priest)
+            .OrderByDescending(r => r.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync();
+
+        return reviews.Select(r => MapToResponse(r, joinedAt.Value)).ToList();
     }
 }

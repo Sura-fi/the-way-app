@@ -1,5 +1,6 @@
 // Crop to a centered square and re-encode as a small JPEG data URL.
-export async function fileToAvatarDataUrl(file: File, size = 256, quality = 0.8): Promise<string>
+// 512px so the tap-to-enlarge viewer stays sharp.
+export async function fileToAvatarDataUrl(file: File, size = 512, quality = 0.8): Promise<string>
  {
   const bitmap = await createImageBitmap(file);
   const side = Math.min(bitmap.width, bitmap.height);
