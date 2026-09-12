@@ -14,10 +14,12 @@ namespace TheWay.Api.Controllers;
 public class MeController : ControllerBase
 {
     private readonly UserService _userService;
+    private readonly ReviewService _reviewService;
 
-    public MeController(UserService userService)
+    public MeController(UserService userService, ReviewService reviewService)
     {
         _userService = userService;
+        _reviewService = reviewService;
     }
 
     // ──────────────────────────────────────────
@@ -128,6 +130,37 @@ public class MeController : ControllerBase
 
         var logs = await _userService.GetUserLogsAsync(userId.Value, from, to);
         return Ok(logs);
+    }
+
+    // ──────────────────────────────────────────
+    // GET /api/me/reviews/pending
+    // Priest comments this GodChild hasn't said "Amen" to yet (for the pop-up)
+    // ──────────────────────────────────────────
+    [HttpGet("reviews/pending")]
+    public async Task<IActionResult> GetMyPendingReviews()
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var reviews = await _reviewService.GetPendingForChildAsync(userId.Value);
+        return Ok(reviews);
+    }
+
+    // ──────────────────────────────────────────
+    // POST /api/me/reviews/{reviewId}/acknowledge
+    // GodChild says "Amen" to one of their own priest comments
+    // ──────────────────────────────────────────
+    [HttpPost("reviews/{reviewId:guid}/acknowledge")]
+    public async Task<IActionResult> AcknowledgeReview(Guid reviewId)
+    {
+        var userId = GetUserId();
+        if (userId == null) return Unauthorized();
+
+        var review = await _reviewService.AcknowledgeReviewAsync(reviewId, userId.Value);
+        if (review == null)
+            return NotFound(new { message = "Comment not found." });
+
+        return Ok(review);
     }
 
     // ──────────────────────────────────────────

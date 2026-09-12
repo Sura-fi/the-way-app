@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { apiFetch } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
-import { History, ChevronDown, ChevronUp, Trash2, Target, CalendarDays, CheckCircle2 } from "lucide-react";
+import { History, ChevronDown, ChevronUp, Trash2, Target, CalendarDays, CheckCircle2, MessageSquare, Clock, Cross } from "lucide-react";
 import ProgressGraph from "@/components/ui/ProgressGraph";
+import {
+  ReviewResponse,
+  getDaysRemaining,
+  getExpiryStyle,
+  formatReviewDate,
+  markReviewsNotified,
+} from "@/lib/reviews";
 
 interface WeekSummary {
   daysWithActivity: number;
@@ -46,18 +54,32 @@ interface WeekLogsResponse {
   logs: (DailyLog | null)[];
   summary: WeekSummary;
   hasReview: boolean;
+  reviews: ReviewResponse[];
 }
 
-function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () => void }) {
+function WeekDetail({
+  weekNumber,
+  focusReviewId,
+  onClear,
+}: {
+  weekNumber: number;
+  focusReviewId: string | null;
+  onClear: () => void;
+}) {
   const { t } = useLocale();
   const [data, setData] = useState<WeekLogsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState<ReviewResponse[]>([]);
+  const [amenBusy, setAmenBusy] = useState<string | null>(null);
+  const [amenError, setAmenError] = useState<string | null>(null);
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchWeek() {
       try {
         const result = await apiFetch<WeekLogsResponse>(`/api/me/weeks/${weekNumber}`);
         setData(result);
+        setReviews(result.reviews ?? []);
       } catch {
         // Silent fail
       }
@@ -65,6 +87,37 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
     }
     fetchWeek();
   }, [weekNumber]);
+
+  // Scroll to (and briefly highlight) the comment opened from the pop-up
+  useEffect(() => {
+    if (!focusReviewId || !data) return;
+    const scrollTimer = setTimeout(() => {
+      document
+        .getElementById(`review-${focusReviewId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightId(focusReviewId);
+    }, 350); // let the expand animation settle first
+    const clearTimer = setTimeout(() => setHighlightId(null), 3000);
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearTimer);
+    };
+  }, [focusReviewId, data]);
+
+  const handleAmen = async (reviewId: string) => {
+    setAmenBusy(reviewId);
+    setAmenError(null);
+    try {
+      const updated = await apiFetch<ReviewResponse>(`/api/me/reviews/${reviewId}/acknowledge`, {
+        method: "POST",
+      });
+      setReviews((rs) => rs.map((r) => (r.id === reviewId ? updated : r)));
+      markReviewsNotified([reviewId]);
+    } catch {
+      setAmenError(reviewId);
+    }
+    setAmenBusy(null);
+  };
 
   if (loading) return <div className="p-4 flex justify-center"><div className="w-6 h-6 border-2 border-gold-muted border-t-transparent rounded-full animate-spin" /></div>;
   if (!data) return <div className="p-4 text-center text-umber-soft text-sm">Failed to load week details.</div>;
@@ -109,7 +162,7 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
       <div className="w-full h-64 mb-6">
         <ProgressGraph logs={validLogs} dateRange={dateRange} />
       </div>
-      
+
       {(data.isComplete || data.isCurrentWeek) && (
         <div className="bg-white/50 p-4 rounded-xl border border-parchment-dark/10 space-y-3">
           <div className="flex items-center gap-2 mb-2">
@@ -136,6 +189,62 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
         </div>
       )}
 
+      {/* Priest comments written during this week */}
+      {reviews.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-gold-muted" />
+            <h4 className="font-bold text-sm text-umber-deep">{t("history.father_comments")}</h4>
+          </div>
+          {reviews.map((review) => {
+            const daysLeft = getDaysRemaining(review.expiresAt);
+            const expiryStyle = getExpiryStyle(daysLeft);
+
+            return (
+              <div
+                key={review.id}
+                id={`review-${review.id}`}
+                className={`bg-white/60 rounded-xl border border-parchment-dark/10 border-l-4 ${expiryStyle.border} p-4 space-y-3 transition-shadow duration-500 ${
+                  highlightId === review.id ? "ring-2 ring-gold-muted shadow-lg" : ""
+                }`}
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <p className="text-sm font-medium text-umber-deep">{review.priestName}</p>
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full flex items-center gap-1 shrink-0 ${expiryStyle.badge}`}>
+                    <Clock className="w-3 h-3" />
+                    {daysLeft} {t("priest.days_remaining")}
+                  </span>
+                </div>
+
+                <p className="text-sm text-umber-deep whitespace-pre-wrap">{review.content}</p>
+
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-umber-soft">{formatReviewDate(review.createdAt)}</span>
+                  {review.acknowledgedAt ? (
+                    <span className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-sage/10 text-sage font-medium">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {t("history.amen")} · {formatReviewDate(review.acknowledgedAt)}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleAmen(review.id)}
+                      disabled={amenBusy === review.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sage/15 text-sage text-sm font-medium font-ethiopic hover:bg-sage/25 disabled:opacity-50 transition-colors"
+                    >
+                      <Cross className="w-4 h-4" strokeWidth={2.25} />
+                      {t("history.amen")}
+                    </button>
+                  )}
+                </div>
+                {amenError === review.id && (
+                  <p className="text-xs text-warm-red">{t("history.amen_failed")}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {!data.isCurrentWeek && (
         <div className="flex justify-end pt-2">
           <button
@@ -151,7 +260,28 @@ function WeekDetail({ weekNumber, onClear }: { weekNumber: number, onClear: () =
   );
 }
 
+function HistorySkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map(i => <div key={i} className="h-20 bg-parchment rounded-xl animate-pulse" />)}
+    </div>
+  );
+}
+
+// useSearchParams needs a Suspense boundary for the production build (Next 14)
 export default function HistoryPage() {
+  return (
+    <Suspense fallback={<HistorySkeleton />}>
+      <HistoryContent />
+    </Suspense>
+  );
+}
+
+function HistoryContent() {
+  const searchParams = useSearchParams();
+  const focusWeek = Number(searchParams.get("week")) || null;
+  const focusReviewId = searchParams.get("review");
+
   const [weeks, setWeeks] = useState<WeekHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
@@ -171,9 +301,14 @@ export default function HistoryPage() {
     loadWeeks();
   }, []);
 
+  // Open the week linked from a comment pop-up (also when already on this page)
+  useEffect(() => {
+    if (focusWeek) setExpandedWeek(focusWeek);
+  }, [focusWeek, focusReviewId]);
+
   const handleClearWeek = async (weekNumber: number) => {
     if (!confirm(`Are you sure you want to clear all logs and reviews for Week ${weekNumber}?`)) return;
-    
+
     setIsDeleting(true);
     try {
       await apiFetch(`/api/me/weeks/${weekNumber}`, { method: "DELETE" });
@@ -186,11 +321,7 @@ export default function HistoryPage() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map(i => <div key={i} className="h-20 bg-parchment rounded-xl animate-pulse" />)}
-      </div>
-    );
+    return <HistorySkeleton />;
   }
 
   return (
@@ -214,7 +345,7 @@ export default function HistoryPage() {
             const formatD = (dStr: string) => new Date(dStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
             return (
-              <motion.div 
+              <motion.div
                 key={week.weekNumber}
                 className="sacred-card p-0 overflow-hidden"
                 initial={{ opacity: 0, y: 10 }}
@@ -256,7 +387,11 @@ export default function HistoryPage() {
                       exit={{ height: 0 }}
                       className="overflow-hidden"
                     >
-                      <WeekDetail weekNumber={week.weekNumber} onClear={() => handleClearWeek(week.weekNumber)} />
+                      <WeekDetail
+                        weekNumber={week.weekNumber}
+                        focusReviewId={week.weekNumber === focusWeek ? focusReviewId : null}
+                        onClear={() => handleClearWeek(week.weekNumber)}
+                      />
                     </motion.div>
                   )}
                 </AnimatePresence>

@@ -19,4 +19,8 @@ public class UserDetailResponse
     public int CurrentDayInWeek { get; set; }     // 1–7 (day 7 = review day)
     public DateOnly CurrentWeekStart { get; set; }
     public DateOnly CurrentWeekEnd { get; set; }
+
+    // ── Presence ────────────────────────────────
+    public bool IsOnline { get; set; }
+    public DateTime? LastSeenAt { get; set; }
 }

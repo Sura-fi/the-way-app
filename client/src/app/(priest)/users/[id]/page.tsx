@@ -21,6 +21,8 @@ import {
   Phone
 } from "lucide-react";
 import ReviewSection from "@/components/ui/ReviewSection";
+import { useHubEvent } from "@/components/providers/QuoteProvider";
+import { PresenceIndicator, PresenceChange } from "@/components/ui/PresenceIndicator";
 import ProgressGraph from "@/components/ui/ProgressGraph";
 
 // Keep this synchronized with backend UserDetailResponse
@@ -40,6 +42,8 @@ interface UserDetail {
   currentDayInWeek: number;
   currentWeekStart: string;
   currentWeekEnd: string;
+  isOnline: boolean;
+  lastSeenAt: string | null;
 }
 
 interface DailyLog {
@@ -144,6 +148,13 @@ export default function PriestUserDetailPage() {
     }
     fetchWeek();
   }, [userId, selectedWeek]);
+
+  // ── Live online / last-seen updates ──────────
+  useHubEvent<PresenceChange>("PresenceChanged", (p) => {
+    setUser((u) =>
+      u && u.id === p.userId ? { ...u, isOnline: p.isOnline, lastSeenAt: p.lastSeenAt } : u
+    );
+  });
 
   // ── Toggle user active status ─────────────────
   const handleToggleStatus = async () => {
@@ -262,13 +273,14 @@ export default function PriestUserDetailPage() {
 
           {/* Centered identity */}
           <div className="flex flex-col items-center text-center">
-            <Avatar src={user.profilePictureUrl} name={user.spiritualName} sizeClasses="w-20 h-20" textClasses="text-3xl" />
+            <Avatar src={user.profilePictureUrl} name={user.spiritualName} sizeClasses="w-20 h-20" textClasses="text-3xl" zoomable />
             <h1 className="text-2xl sm:text-3xl font-bold font-ethiopic text-umber-deep mt-3">
               {user.formalName}
             </h1>
             <p className="text-lg font-ethiopic text-umber-soft/80 italic">
               {user.spiritualName}
             </p>
+            <PresenceIndicator isOnline={user.isOnline} lastSeenAt={user.lastSeenAt} className="mt-1" />
 
             <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-sm text-umber-deep/70 mt-3">
               <div className="flex items-center gap-1.5">

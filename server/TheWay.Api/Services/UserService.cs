@@ -8,10 +8,12 @@ namespace TheWay.Api.Services;
 public class UserService
 {
     private readonly AppDbContext _db;
+    private readonly PresenceTracker _presence;
 
-    public UserService(AppDbContext db)
+    public UserService(AppDbContext db, PresenceTracker presence)
     {
         _db = db;
+        _presence = presence;
     }
 
     // ──────────────────────────────────────────
@@ -62,7 +64,9 @@ public class UserService
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
                 CurrentDayInWeek = dayInWeek,
-                CurrentWeekNumber = weekNum
+                CurrentWeekNumber = weekNum,
+                IsOnline = _presence.IsOnline(u.Id),
+                LastSeenAt = u.LastSeenAt
             };
         }).ToList();
     }
@@ -119,7 +123,9 @@ public class UserService
             CurrentWeekNumber = weekNum,
             CurrentDayInWeek = dayInWeek,
             CurrentWeekStart = weekStart,
-            CurrentWeekEnd = weekEnd
+            CurrentWeekEnd = weekEnd,
+            IsOnline = _presence.IsOnline(user.Id),
+            LastSeenAt = user.LastSeenAt
         };
     }
 
@@ -137,10 +143,13 @@ public class UserService
 
         return new PriestPublicResponse
         {
+            Id = priest.Id,
             FormalName = priest.FormalName,
             SpiritualName = priest.SpiritualName,
             PhoneNumber = priest.PhoneNumber,
-            ProfilePictureUrl = priest.ProfilePictureUrl
+            ProfilePictureUrl = priest.ProfilePictureUrl,
+            IsOnline = _presence.IsOnline(priest.Id),
+            LastSeenAt = priest.LastSeenAt
         };
     }
 
@@ -279,12 +288,20 @@ public class UserService
             }
         }
 
-        // Check if a priest review exists for this week's date range
+        // Non-expired priest reviews written during this week's date range
         var weekStartDt = weekStart.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var weekEndDt = weekEnd.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
-        var hasReview = await _db.PriestReviews
-            .AnyAsync(r => r.GodChildId == userId &&
-                           r.CreatedAt >= weekStartDt && r.CreatedAt <= weekEndDt);
+        var now = DateTime.UtcNow;
+        var reviews = (await _db.PriestReviews
+            .Where(r => r.GodChildId == userId &&
+                        r.CreatedAt >= weekStartDt && r.CreatedAt <= weekEndDt &&
+                        r.ExpiresAt > now)
+            .Include(r => r.Priest)
+            .OrderByDescending(r => r.CreatedAt)
+            .AsNoTracking()
+            .ToListAsync())
+            .Select(r => ReviewService.MapToResponse(r, user.CreatedAt))
+            .ToList();
 
         // Build summary
         var summary = BuildWeekSummary(logs);
@@ -298,7 +315,8 @@ public class UserService
             IsComplete = isComplete,
             Logs = slots,
             Summary = summary,
-            HasReview = hasReview
+            HasReview = reviews.Count > 0,
+            Reviews = reviews
         };
     }
 
@@ -317,8 +335,8 @@ public class UserService
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         var (currentWeek, _) = CalculateWeekCycle(user.CreatedAt, today);
 
-        // Cap at 13 weeks (90 days)
-        var maxWeek = Math.Min(currentWeek, 13);
+        // Only the most recent 13 weeks (90 days) — older data is purged
+        var firstWeek = Math.Max(1, currentWeek - 12);
 
         // Fetch all logs within the range
         var allLogs = await _db.DailyLogs
@@ -333,7 +351,7 @@ public class UserService
 
         var weeks = new List<WeekHistoryItem>();
 
-        for (int w = 1; w <= maxWeek; w++)
+        for (int w = firstWeek; w <= currentWeek; w++)
         {
             var weekStart = joinDate.AddDays((w - 1) * 7);
             var weekEnd = weekStart.AddDays(6);
@@ -479,7 +497,7 @@ public class UserService
     /// Calculates the week number and day-in-week for a user based on their join date.
     /// Week 1 starts on joinDate, each week is exactly 7 days.
     /// </summary>
-    private static (int WeekNumber, int DayInWeek) CalculateWeekCycle(DateTime createdAt, DateOnly today)
+    internal static (int WeekNumber, int DayInWeek) CalculateWeekCycle(DateTime createdAt, DateOnly today)
     {
         var joinDate = DateOnly.FromDateTime(createdAt);
         var totalDays = today.DayNumber - joinDate.DayNumber;

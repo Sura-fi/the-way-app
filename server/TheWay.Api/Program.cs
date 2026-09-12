@@ -139,6 +139,7 @@ builder.Services.AddScoped<QuoteService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ReviewService>();
 builder.Services.AddScoped<NoteService>();
+builder.Services.AddSingleton<PresenceTracker>();
 builder.Services.AddHostedService<ReviewCleanupService>();
 // builder.Services.AddHostedService<DataPurgeService>();
 

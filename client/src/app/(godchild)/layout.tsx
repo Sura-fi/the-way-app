@@ -13,12 +13,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, History, User } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { APP_VERSION } from "@/lib/version";
+import { useHubEvent } from "@/components/providers/QuoteProvider";
+import { PresenceIndicator, PresenceChange } from "@/components/ui/PresenceIndicator";
+import CommentNotifier from "@/components/ui/CommentNotifier";
 
 interface PriestInfo {
+  id: string;
   formalName: string;
   spiritualName: string;
   phoneNumber: string;
   profilePictureUrl?: string | null;
+  isOnline: boolean;
+  lastSeenAt: string | null;
 }
 
 export default function GodChildLayout({ children }: { children: ReactNode }) {
@@ -52,6 +58,13 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
       .then(setPriest)
       .catch(() => {});
   }, []);
+
+  // Live "Father is online / last seen" updates
+  useHubEvent<PresenceChange>("PresenceChanged", (p) => {
+    setPriest((pr) =>
+      pr && pr.id === p.userId ? { ...pr, isOnline: p.isOnline, lastSeenAt: p.lastSeenAt } : pr
+    );
+  });
 
   return (
     <ProtectedRoute allowedRoles={["GodChild"]}>
@@ -177,6 +190,7 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                         name={priest.spiritualName}
                         sizeClasses="w-10 h-10"
                         textClasses="text-base"
+                        zoomable
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-umber-deep">
@@ -185,6 +199,11 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
                         {priest.phoneNumber && (
                           <p className="text-xs text-umber-soft">{priest.phoneNumber}</p>
                         )}
+                        <PresenceIndicator
+                          isOnline={priest.isOnline}
+                          lastSeenAt={priest.lastSeenAt}
+                          className="mt-1"
+                        />
                       </div>
                     </div>
                   </div>
@@ -250,6 +269,9 @@ export default function GodChildLayout({ children }: { children: ReactNode }) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* "You received a comment from …" pop-up */}
+        <CommentNotifier />
 
         {/* Page Content */}
         <motion.main

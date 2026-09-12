@@ -5,8 +5,10 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
+import type { HubConnection } from "@microsoft/signalr";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { apiFetch } from "@/lib/api";
 import { getQuoteConnection, stopQuoteConnection } from "@/lib/signalr";
@@ -22,6 +24,7 @@ export interface Quote {
 interface QuoteContextType {
   quote: Quote | null;
   isLoading: boolean;
+  connection: HubConnection | null; // started real-time connection (null until connected)
 }
 
 // ── localStorage Cache Key ──────────────────────
@@ -51,6 +54,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
   const token = user?.token ?? null;
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [connection, setConnection] = useState<HubConnection | null>(null);
 
   // ── Fetch initial quote + start SignalR ────────
   useEffect(() => {
@@ -99,6 +103,9 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         if (conn.state === "Disconnected") {
           await conn.start();
         }
+
+        // Share the connection so other components can subscribe (useHubEvent)
+        if (isMounted) setConnection(conn);
       } catch {
         // SignalR connection failed — not critical
       }
@@ -109,12 +116,13 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
     // Cleanup on unmount or user change
     return () => {
       isMounted = false;
+      setConnection(null);
       stopQuoteConnection();
     };
   }, [token]);
 
   return (
-    <QuoteContext.Provider value={{ quote, isLoading }}>
+    <QuoteContext.Provider value={{ quote, isLoading, connection }}>
       {children}
     </QuoteContext.Provider>
   );
@@ -127,4 +135,22 @@ export function useQuote() {
     throw new Error("useQuote must be used within a QuoteProvider");
   }
   return context;
+}
+
+// ── Subscribe to a hub event for the lifetime of a component ──
+export function useHubEvent<T>(event: string, handler: (payload: T) => void) {
+  const { connection } = useQuote();
+
+  // Always call the latest handler without re-subscribing
+  const handlerRef = useRef(handler);
+  useEffect(() => {
+    handlerRef.current = handler;
+  });
+
+  useEffect(() => {
+    if (!connection) return;
+    const listener = (payload: T) => handlerRef.current(payload);
+    connection.on(event, listener);
+    return () => connection.off(event, listener);
+  }, [connection, event]);
 }
